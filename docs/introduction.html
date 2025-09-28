@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>サークル紹介 | 大阪公立大学 自主ゼミサークル理数工学研究会</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 使用するフォントの取り込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <!-- スライドショー用のライブラリ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- アイコンフォントの取り込み -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="intro">
+    <header>
+      <h1 class="site-logo">
+      <a href="top-page.html">りすけん Omunia</a>
+    </h1>
+      <nav class="header-nav">
+        <ul class="menu-group">
+          <li class="menu-items"><a href="introduction.html">どんなサークル？ </a></li>
+          <li class="menu-items"><a href="#">自主ゼミ一覧</a></li>
+          <li class="menu-items"><a href="information.html">お知らせ</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger-menu" aria-label="メニューを開く">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    </header>
+    <div class="introduction">
+      <h2><span class="section-sub-title">About Us</span></h2>
+      <h1><span class="section-title-introduction">理数工学研究会 OMUniaとは？</span></h1>
+      <div class="about">
+        <p>我々理数工学研究会OMUnia(略してりすけん)は市大の物理学研究会と府大の基礎理系ゼミサークルが合併してできた自主ゼミサークルです。</p>
+        <p>りすけんでは対面とオンライン両方でゼミを行うことができ，現在も様々なゼミが開催されています。</p>
+        <p>行うゼミに制限はなくサークルメンバーから参加者を募って自由にゼミを行うことができます。</p>
+        <p>絶対なにかに参加しないといけないとかはありません。気ままに活動できるので気になったらぜひご参加ください。
+        </p>
+      </div>
+      <div class="slide-title">
+        <p>参考 : りすけん説明会資料</p>
+      </div>
+      <div class="slide-container">
+        <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vThIKmOR0vDewWP8sFmAGt4fDg0hCJx_wK1lMegLz4DPWgnpUz8G196sTWL51F7fQ/pubembed?start=false&loop=false&delayms=3000" frameborder="0" width="1280" height="749" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+      </div>
+      </div>
+  <div class="belt">
+    <h2><span class="belt-items">興味のある方はメールやDMにてお気軽にご連絡ください！</span></h2>
+  </div>
+  <div class="contact">
+    <h2><span class="section-sub-title-contact">Contact</span></h2>
+    <div class="contact-buttons-container">
+      <a href="mailto:circle.omunia@gmail.com" class="btn-sns btn-mail">
+        <i class="fa-solid fa-envelope"></i>
+        <span>メールでお問い合わせ</span>
+      </a>
+
+      <a href="https://x.com/YOUR_USERNAME" class="btn-sns btn-twitter" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-x-twitter"></i>
+        <span>XのDMでお問い合わせ</span>
+      </a>
+
+    </div>
+  </div>
+  <div class="copyright">
+    <small>&copy; 2025 大坂公立大学 理数工学研究会Omunia.</small>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.swiper', {
+        // オプション設定
+        loop: true, // ループさせる
+        speed: 1000, // 切り替わる時のスピード
+        autoplay: {
+          delay: 4000, // 4秒ごとに自動再生
+          disableOnInteraction: false, // ユーザーが操作しても自動再生を止めない
+        },
+        pagination: {
+          el: '.swiper-pagination', // ページネーションの要素
+          clickable: true, // クリックでスライドを切り替え
+        },
+        navigation: {
+          nextEl: '.swiper-button-next', // 「次へ」ボタンの要素
+          prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
+        },
+      });
+    </script>
+  </body>
+</html>

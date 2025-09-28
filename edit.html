@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>記事編集ページ</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+      input, textarea { width: 100%; margin-bottom: 10px; padding: 5px; box-sizing: border-box;}
+      textarea { height: 300px; }
+      .current-image { max-width: 200px; display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+  <div class="editor-container">
+    <h1>記事編集フォーム</h1>
+    <form id="edit-form">
+      <label>タイトル:20文字以内</label>
+      <input type="text" id="title" name="title" maxlength="20" required>
+
+      <label>日付 (YYYY-MM-DD):</label>
+      <input type="date" id="date" name="date" required>
+
+      <label>現在の画像:</label>
+      <img id="current-image" src="" alt="現在の画像" class="current-image">
+      <label>画像を更新:</label>
+      <input type="file" id="image" name="image" accept="image/*">
+
+      <label>本文 (Markdown形式):</label>
+      <textarea id="contentMd" name="contentMd"></textarea>
+
+      <button type="submit">更新する</button>
+    </form>
+    <a href="admin.html">管理ページに戻る</a>
+    <div class="preview-area">
+    <h2>プレビュー</h2>
+    <article class="report-content">
+        <h2><span class="section-sub-title">Information</span></h2>
+        <h1><span id="preview-title">タイトルがここに表示されます</span></h1>
+        <time id="preview-date">2025年9月28日</time>
+        <img id="preview-image" src="" alt="プレビュー画像" style="display:none;">
+        <div id="preview-content" class="report-body">
+            <p>本文のプレビューがここに表示されます。</p>
+        </div>
+    </article>
+  </div>
+  </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+    $(async function() {
+    const API_URL = 'http://localhost:3000/api/posts';
+
+    // 1. URLから編集したい記事のIDを取得
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('id');
+
+    if (!postId) {
+        alert('編集する記事のIDが指定されていません。');
+        window.location.href = 'admin.html';
+        return;
+    }
+
+    // --- プレビュー更新機能（admin.htmlからコピー） ---
+    function updatePreview() {
+        const title = $('#title').val();
+        const date = $('#date').val();
+        const contentMd = $('#contentMd').val();
+        const imageInput = $('#image')[0];
+
+        let displayDate = '日付';
+        if (date) {
+            const d = new Date(date);
+            displayDate = `公開日 : ${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+        
+        $('#preview-title').text(title || 'タイトルがここに表示されます');
+        $('#preview-date').text(displayDate);
+        $('#preview-content').html(marked.parse(contentMd || ''));
+
+        if (imageInput.files && imageInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => $('#preview-image').attr('src', e.target.result).show();
+            reader.readAsDataURL(imageInput.files[0]);
+        } else {
+            // 新しい画像が選択されていなければ、既存の画像を表示し続ける
+            if (!$('#preview-image').attr('src')) {
+              $('#preview-image').hide();
+            }
+        }
+    }
+
+    // --- 既存データの取得とフォームへのセット ---
+    try {
+        const response = await fetch(`${API_URL}/${postId}`);
+        if (!response.ok) throw new Error('記事データの取得に失敗しました。');
+        
+        const postData = await response.json();
+        
+        $('#title').val(postData.title);
+        $('#date').val(postData.date);
+        $('#contentMd').val(postData.contentMd);
+        
+        // 既存の画像があればプレビューに表示
+        if (postData.image) {
+          $('#preview-image').attr('src', `http://localhost:3000${postData.image}`).show();
+        }
+
+        // ▼▼▼ データをフォームにセットした後に、プレビューを一度更新 ▼▼▼
+        updatePreview();
+
+    } catch (error) {
+        alert(error.message);
+        console.error(error);
+    }
+
+    // --- イベントリスナー ---
+    // 入力があるたびにプレビューを更新
+    $('#edit-form input, #edit-form textarea').on('input', updatePreview);
+    
+    // --- フォーム送信（更新）の処理 ---
+    $('#edit-form').on('submit', async function(event) {
+        event.preventDefault();
+        // ...以前のPUTメソッドを使ったfetch処理はそのまま...
+    });
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>りすけん お知らせ | 大阪公立大学 自主ゼミサークル理数工学研究会 Omunia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 使用するフォントの取り込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <!-- スライドショー用のライブラリ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- アイコンフォントの取り込み -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="article">
+    <header>
+      <h1>りすけん Omunia</h1>
+      <nav>
+        <ul class="menu-group">
+          <li class="menu-items">どんなサークル？ </li>
+          <li class="menu-items">自主ゼミ一覧</li>
+          <li class="menu-items">おしらせ</li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="infoContainer">
+      <article class="reportContents">
+        <h2><span class="section-sub-title">Information</span></h2>
+        <h1><span class="section-title-information"> 本日，量子力学ゼミが行われました！ </span></h1>
+        <hr>
+        <p class="displayDate">公開日 : 11111</p>
+
+        <img class="topImage" src="img/slide1.jpg">
+
+        <p class="contents">本日，森ノ宮キャンパスにて量子力学ゼミが行われました！<br>教科書は砂川先生の量子力学を使用しています！</p>
+      </article>
+    </main>
+
+  <div class="belt">
+    <h2><span class="belt-items">興味のある方はメールやDMにてお気軽にご連絡ください！</span></h2>
+  </div>
+  <div class="contact">
+    <h2><span class="section-sub-title-contact">Contact</span></h2>
+    <div class="contact-buttons-container">
+      <a href="mailto:circle.omunia@gmail.com" class="btn-sns btn-mail">
+        <i class="fa-solid fa-envelope"></i>
+        <span>メールでお問い合わせ</span>
+      </a>
+
+      <a href="https://x.com/YOUR_USERNAME" class="btn-sns btn-twitter" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-x-twitter"></i>
+        <span>XのDMでお問い合わせ</span>
+      </a>
+
+    </div>
+  </div>
+  <div class="copyright">
+    <small>&copy; 2025 大坂公立大学 理数工学研究会Omunia.</small>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.swiper', {
+        // オプション設定
+        loop: true, // ループさせる
+        speed: 1000, // 切り替わる時のスピード
+        autoplay: {
+          delay: 4000, // 4秒ごとに自動再生
+          disableOnInteraction: false, // ユーザーが操作しても自動再生を止めない
+        },
+        pagination: {
+          el: '.swiper-pagination', // ページネーションの要素
+          clickable: true, // クリックでスライドを切り替え
+        },
+        navigation: {
+          nextEl: '.swiper-button-next', // 「次へ」ボタンの要素
+          prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
+        },
+      });
+    </script>
+  </body>
+</html>

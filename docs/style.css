@@ -1,0 +1,615 @@
+header{
+  top: 0;
+  display:flex;
+  width:100%;
+  height: 80px;
+  justify-content: space-between;
+  background-color: white;
+  align-items: center;
+  position: fixed;
+  padding: 0 30px;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+/* --- ロゴのスタイル --- */
+.site-logo {
+  font-size: 30px;
+  margin: 0;
+}
+.site-logo a {
+  text-decoration: none;
+  color: #333;
+}
+
+.menu-group {
+  /* ulタグのデフォルトの余白を消しておくとレイアウトが崩れにくい */
+  margin: 0;
+  padding: 0;
+}
+
+.menu-items {
+  font-family: 'Noto Sans JP', sans-serif;
+  /* お好みで文字の太さやサイズも調整 */
+  font-weight: 800; /* Bold (太字) */
+  list-style: none;
+  display: inline-block;
+  padding: 0 20px; /* 上下の余白を0、左右の余白を15pxなどに調整 */
+}
+
+.menu-items a {
+  position: relative; /* 下線アニメーションの基準点 */
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  padding: 5px 0;
+  transition: color 0.3s;
+}
+
+/* マウスを乗せた時の下線アニメーション */
+.menu-items a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #1a73e8; /* メインカラー */
+  transform: scaleX(0); /* 最初は非表示 */
+  transform-origin: right;
+  transition: transform 0.4s;
+}
+
+.menu-items a:hover {
+  color: #1a73e8;
+}
+.menu-items a:hover::after {
+  transform: scaleX(1); /* 左に伸びるアニメーション */
+  transform-origin: left;
+}
+
+/* --- ハンバーガーメニューのボタン（普段は非表示） --- */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.hamburger-menu span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #333;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* ▼▼▼ レスポンシブ対応（スマホ表示） ▼▼▼ */
+@media (max-width: 768px) {
+  /* PC用ナビゲーションを隠す */
+  .header-nav {
+    display: none;
+  }
+
+  /* ハンバーガーメニューを表示する */
+  .hamburger-menu {
+    display: flex;
+  }
+
+  /* --- スマホ用メニューが開いた時のスタイル --- */
+  .header-nav.is-open {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+
+    /* メニュー項目を中央に配置 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .header-nav.is-open .menu-group {
+    display: flex;
+    flex-direction: column; /* 縦並びにする */
+    text-align: center;
+    gap: 40px;
+  }
+  .header-nav.is-open .menu-item a {
+    font-size: 24px;
+  }
+
+  /* ハンバーガーアイコンを「×」印にアニメーション */
+  .hamburger-menu.is-open span:nth-of-type(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  .hamburger-menu.is-open span:nth-of-type(2) {
+    opacity: 0;
+  }
+  .hamburger-menu.is-open span:nth-of-type(3) {
+    transform: translateY(-12px) rotate(-45deg);
+  }
+}
+
+.introduction{
+  padding-top: 80px;
+  padding-left: clamp(1.5rem, 1.5rem + 6vw, 6.25rem);
+  padding-right: clamp(1.5rem, 1.5rem + 6vw, 5rem);
+  background-color:rgba(240, 245, 255, 0.5);
+}
+
+.information {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  padding-left: clamp(1.5rem, 1.5rem + 6vw, 6.25rem);
+  padding-right: clamp(1.5rem, 1.5rem + 6vw, 5rem);
+  background-color:rgba(240, 245, 255, 0.5);
+}
+
+.info .information {
+  padding-top: 80px;
+  padding-left: clamp(1.5rem, 1.5rem + 6vw, 6.25rem);
+  padding-right: clamp(1.5rem, 1.5rem + 6vw, 5rem);
+  background-color:rgba(240, 245, 255, 0.5);
+  text-align: center;
+}
+
+.article .information {
+  padding-top: 80px;
+  padding-left: clamp(1.5rem, 1.5rem + 6vw, 6.25rem);
+  padding-right: clamp(1.5rem, 1.5rem + 6vw, 5rem);
+  background-color:rgba(240, 245, 255, 0.5);
+  text-align: center;
+}
+
+.section-title-introduction{
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1.1rem + 3vw, 3.125rem);
+  background: linear-gradient(transparent 50%, #8efffb 50%);
+  letter-spacing: 0.1em;
+}
+
+.section-title-information{
+  font-family: 'Noto Sans JP', sans-serif;
+  margin: 0 0 ;
+  font-weight: 800;
+  line-height: clamp(1, 0.5 + 1vw, 1.2);
+  font-size: clamp(1.5rem, 1.1rem + 3vw, 3.125rem);
+  background: linear-gradient(transparent 50%, yellow 50%);
+  letter-spacing: 0.1em;
+}
+
+.article .section-title-information {
+  font-size: clamp(0.5rem, 0.5rem + 3vw, 3.125rem);
+}
+
+.section-sub-title {
+  font-family: "Oswald", sans-serif;
+  font-weight: bold;
+  font-size: clamp(0.5rem, 0.3rem + 3vw, 1.6rem);
+  border-bottom: 3px solid #1f1f1f;
+  padding-bottom: 2px;
+}
+
+body{
+  margin: 0 0;
+  padding: 0 0;
+}
+
+/* Swiperコンテナの基本スタイル */
+.swiper {
+  position: relative;
+  width: 100%;
+  height: 700px; /* スライドショーの高さを指定 */
+  margin-top: 80px; /* 固定ヘッダーの高さ分だけ下にずらす */
+}
+
+/* スライド内の画像のスタイル */
+.swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 画像がコンテナに合うように調整（トリミングされる） */
+  display: block; /* 画像下の余分な隙間をなくす */
+}
+
+/* ページネーション（丸いボタン）の色の変更 */
+.swiper-pagination-bullet-active {
+  background-color: #000000 !important; /* アクティブなボタンの色 */
+}
+
+/* ナビゲーション（矢印）の色の変更 */
+.swiper-button-prev,
+.swiper-button-next {
+  color: #000000 !important; /* 矢印の色 */
+}
+
+.hero-text {
+  /* ↓↓ ここからが重要 ↓↓ */
+  position: absolute;   /* 親要素を基準に、自由な位置に配置する */
+  top: 50%;             /* 親要素の上から50%の位置に */
+  left: 50%;            /* 親要素の左から50%の位置に */
+  transform: translate(-50%, -50%); /* 要素自体の中心に位置を補正する */
+
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+  /* ↓↓ 見た目の調整 ↓↓ */
+  color: white;         /* 文字色 */
+  text-align: center;   /* テキストを中央揃えに */
+  width: 90%;           /* 横幅が広がりすぎないように調整 */
+  font-family: 'Stick', sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.25rem, 0.5rem + 3vw, 3rem);
+  z-index: 10;          /* スライドより手前に表示されるように念のため指定 */
+}
+
+.about {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 600;
+  font-size: clamp(0.5rem, 0.5rem + 2.5vw, 1.8rem);
+  line-height: 2;
+}
+
+.btn {
+  /* ボタンの形状と余白 */
+  display: inline-block; /* ①インラインブロック要素にする */
+  margin-top: 24px;      /* ②ボタンの上の余白 */
+  padding: 12px 32px;    /* ③ボタン内部の余白（上下、左右） */
+
+  /* ボタンの色と文字 */
+  background-color: transparent;
+  color: #1a73e8;
+  font-size: 16px;           /* 文字サイズ */
+  font-weight: bold;         /* 太字にする */
+  text-decoration: none;     /* ④リンクの下線を消す */
+
+  /* ボタンの角と影 */
+  border-radius: 15px; /* ⑤角を少し丸くする */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  /* アニメーション */
+  transition: all 0.3s; /* ⑥背景色が0.3秒かけて変化するように設定 */
+  border: 2px solid #3687f1;
+}
+
+/* マウスが乗った時の.btnのスタイル */
+.btn:hover {
+  background-color: #3687f1; /* 少し濃い青色に変化 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+}
+
+.btn-container {
+  text-align: center;
+}
+
+/* --- カードリストのレイアウト --- */
+.card-list {
+  display: grid;
+  /* 画面幅に応じてカードの列数を自動調整（1列の最小幅は300px） */
+  grid-template-columns: 1fr;
+  gap: 24px; /* カード間の余白 */
+}
+
+/* 画面幅が600px以上になったら（タブレットを想定） */
+@media (min-width: 600px) {
+  .card-list {
+    grid-template-columns: repeat(2, 1fr); /* 2列表示（画面を2等分） */
+  }
+}
+
+/* 画面幅が960px以上になったら（PCを想定） */
+@media (min-width: 960px) {
+  .card-list {
+    grid-template-columns: repeat(4, 1fr); /* 4列表示（画面を4等分） */
+  }
+}
+
+/* --- カード全体のスタイル --- */
+.card {
+  display: block; /* aタグをブロック要素にする */
+  color: #333; /* 文字色を継承させる */
+  text-decoration: none; /* リンクの下線を消す */
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* 画像のはみ出しを隠す */
+  transition: all 0.3s;
+}
+
+/* カードにマウスを乗せた時の動き */
+.card:hover {
+  transform: translateY(-5px); /* 少し浮き上がる */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* --- カードの中身のスタイル --- */
+.card-image {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* 画像の縦横比を16:9に固定 */
+  object-fit: cover; /* 比率を保ったままトリミング */
+  display: block;
+}
+
+.card-content {
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 8px; /* 下に少し余白 */
+}
+
+.card-date {
+  font-size: 14px;
+  color: #888;
+}
+
+.belt {
+  padding: 0 0;
+  margin: 0 0;
+  text-align: center;
+}
+
+.belt-items {
+  padding: 0 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: rgb(0, 0, 0);
+  background-color: #ffffff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1rem + 3vw, 2.5rem);
+  background: linear-gradient(transparent 50%, #8eff9f 50%);
+  letter-spacing: 0.05em;
+}
+
+/* --- SNSフォローセクションのスタイル --- */
+.sns-follow {
+  padding: 10px 0; /* 上下の余白 */
+  text-align: center; /* 中身を中央揃え */
+}
+
+/* --- SNSボタンの共通スタイル --- */
+.btn-sns {
+  margin-top: 20px;
+  display: inline-flex; /* アイコンとテキストを横並び＆中央揃えにする */
+  align-items: center;
+  padding: 12px 24px;
+  border-radius: 50px; /* 角を完全に丸くして、カプセル型に */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+/* --- Twitterボタン専用のスタイル --- */
+.btn-twitter {
+  background-color: #000000; /* Xのブランドカラー（黒） */
+  color: #ffffff;
+}
+
+/* マウスを乗せた時の動き */
+.btn-twitter:hover {
+  background-color: #333333; /* 少し明るい黒に */
+  transform: translateY(-2px); /* 少し浮き上がる */
+}
+
+/* アイコンとテキストの間の余白 */
+.btn-sns i {
+  margin-right: 8px;
+}
+
+/* --- お問い合わせセクションのスタイル --- */
+
+
+/* --- ボタンをまとめるコンテナのスタイル --- */
+.contact-buttons-container {
+  display: flex; /* Flexboxを有効化 */
+  justify-content: center; /* 中央揃え */
+  gap: 20px; /* ボタン間の余白 */
+  flex-wrap: wrap; /* 画面が狭い時に折り返す */
+}
+
+/* --- メールボタン専用のスタイル --- */
+.btn-mail {
+  background-color: #EA4335; /* 例としてGmailの赤色 */
+  color: #ffffff;
+}
+.btn-mail:hover {
+  background-color: #c5372a; /* 少し濃い赤色 */
+}
+
+.contact{
+  padding-top: 10px;
+  padding-bottom: 30px;
+  padding-left: 100px;
+  padding-right: 80px;
+  background-color:rgba(240, 245, 255, 0.5);
+  text-align: center;
+}
+
+.section-sub-title-contact {
+  margin-bottom: 60px;
+  font-family: "Oswald", sans-serif;
+  font-weight: bold;
+  font-size: 25px;
+  border-bottom: 3px solid #1f1f1f;
+  padding-bottom: 2px;
+}
+
+/* --- フッター全体のスタイル --- */
+footer {
+  background-color: #333; /* 背景色を濃いグレーに */
+  color: #fff;           /* 文字色を白に */
+  padding: 5px 0 30px; /* 上、左右、下の余白 */
+}
+
+/* --- コピーライトのスタイル --- */
+.copyright {
+  background-color: #333;
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  border-top: 1px solid #555; /* 上に区切り線 */
+  color: #aaa;
+  font-size: 14px;
+}
+
+.intro .introduction{
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.intro .about{
+  text-align: left;
+  font-size: clamp(0.15rem, 0.15rem + 2.5vw, 1.8rem);
+}
+
+.slide-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9のアスペクト比 */
+  overflow: hidden;
+  background-color:rgba(240, 245, 255, 0.5);
+}
+
+.slide-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.slide-title{
+  text-align: center;
+  margin: 20px 0 20px
+}
+
+hr {
+  border: none; /* デフォルトの線をリセット */
+  height: 1px; /* 線の太さ */
+  background-color: #ccc; /* 線の色（薄いグレー） */
+  margin: 0 0; /* 上下の余白 */
+}
+
+/* --- ページネーションのコンテナ --- */
+.pagination-container {
+  display: flex;
+  justify-content: center; /* 中央揃え */
+  margin-top: 40px;
+}
+
+/* --- ページネーションのリスト --- */
+.pagination {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 8px; /* ボタン間の余白 */
+}
+
+/* --- ページ番号のボタン --- */
+.pagination a {
+  display: block;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+/* マウスホバー時のスタイル */
+.pagination a:hover {
+  background-color: #eee;
+}
+
+/* 現在表示されているページのボタンスタイル */
+.pagination .active a {
+  background-color: #1a73e8; /* メインカラー */
+  color: #fff;
+  border-color: #1a73e8;
+  pointer-events: none; /* アクティブなボタンはクリックできないように */
+}
+
+.infoContainer {
+  margin:0 0;
+  padding-top: 80px;
+  padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
+  padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);
+  background-color:rgba(240, 245, 255, 0.5);
+  text-align: center;
+}
+
+.reportContents {
+  margin:0 0;
+  padding-top: clamp(1.5rem, 0.5rem + 5vw, 5rem);
+  padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
+  padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);
+  border-radius: 2px;
+  background-color:white;
+  text-align: left;
+}
+.displayDate {
+  color :#555;
+  font-size: medium;
+}
+
+.topImage {
+  width: 100%;
+}
+
+.contents {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 20px;
+}
+
+.br-sp {
+  display: inline;
+}
+
+
+/* 画面幅が768px以下になったら（スマホを想定） */
+@media (max-width: 768px) {
+  .br-sp {
+    display: block; /* ブロック要素に変えることで、この要素の手前で改行が起こる */
+  }
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+.setmargin{
+  margin:0 0;
+}
+
+#preview-title{
+  font-family: 'Noto Sans JP', sans-serif;
+  margin: 0 0 ;
+  font-weight: 800;
+  line-height: clamp(1, 0.5 + 1vw, 1.2);
+  font-size: clamp(1.5rem, 0.7rem + 1.5vw, 2.125rem);
+  background: linear-gradient(transparent 50%, yellow 50%);
+  letter-spacing: 0.1em;
+}
+
+.article #preview-title {
+  font-size: clamp(0.5rem, 0.5rem + 1.5vw, 2.125rem);
+}
+
+#preview-date {
+  color :#555;
+  font-size: medium;
+}

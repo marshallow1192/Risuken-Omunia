@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Omunia | 大阪公立大学 自主ゼミサークル理数工学研究会 Omunia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 使用するフォントの取り込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <!-- スライドショー用のライブラリ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- アイコンフォントの取り込み -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header>
+      <h1 class="site-logo">
+      <a href="top-page.html">りすけん Omunia</a>
+    </h1>
+      <nav class="header-nav">
+        <ul class="menu-group">
+          <li class="menu-items"><a href="introduction.html">どんなサークル？ </a></li>
+          <li class="menu-items"><a href="#">自主ゼミ一覧</a></li>
+          <li class="menu-items"><a href="information.html">お知らせ</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger-menu" aria-label="メニューを開く">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    </header>
+    <div class="swiper">
+      <div class="hero-text">
+        <h1 clsss="hero-content">大阪公立大学 <span class="no-wrap">自主ゼミサークル</span></h1>
+        <h2 clsss="hero-content">理数工学研究会 Omunia</h2>
+      </div>
+      <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="img/slide1.jpg" alt="スライドショー画像1"></div>
+        <div class="swiper-slide"><img src="img/slide2.jpg" alt="スライドショー画像2"></div>
+        <div class="swiper-slide"><img src="img/slide3.jpg" alt="スライドショー画像3"></div>
+        <div class="swiper-slide"><img src="img/slide4.jpg" alt="スライドショー画像3"></div>
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+    <div class="introduction">
+      <h2><span class="section-sub-title">About Us</span></h2>
+      <h1><span class="section-title-introduction"><span class="no-wrap">理数工学研究会</span> OMUnia<span class="no-wrap">とは？</span></span></h1>
+      <div class="about">
+        <p>我々理数工学研究会 OMUnia(略してりすけん)は大阪公立大学で活動している自主ゼミサークルです！
+        <br>興味のある分野について学部学科の垣根を越えて、<span class="no-wrap">一緒に学びませんか？</span></p>
+        <div class="btn-container">
+          <a href="introduction.html" class="btn">もっと見る</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="information">
+      <h2><span class="section-sub-title">Information</span></h2>
+      <h1><span class="section-title-information">お知らせ</span></h1>
+
+      <div class="card-list">
+      </div>
+      <div class="btn-container">
+        <a href="information.html" class="btn">もっと見る</a>
+      </div>
+    </div>
+  <div class="belt">
+    <h2><span class="belt-items">興味のある方はメールやDMにてお気軽にご連絡ください！</span></h2>
+  </div>
+  <div class="contact">
+    <h2><span class="section-sub-title-contact">Contact</span></h2>
+    <div class="contact-buttons-container">
+      <a href="mailto:circle.omunia@gmail.com" class="btn-sns btn-mail">
+        <i class="fa-solid fa-envelope"></i>
+        <span>メールでお問い合わせ</span>
+      </a>
+
+      <a href="https://x.com/YOUR_USERNAME" class="btn-sns btn-twitter" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-x-twitter"></i>
+        <span>XのDMでお問い合わせ</span>
+      </a>
+
+    </div>
+  </div>
+  <div class="copyright">
+    <small>&copy; 2025 大坂公立大学 理数工学研究会Omunia.</small>
+  </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.swiper', {
+        // オプション設定
+        loop: true, // ループさせる
+        speed: 1000, // 切り替わる時のスピード
+        autoplay: {
+          delay: 4000, // 4秒ごとに自動再生
+          disableOnInteraction: false, // ユーザーが操作しても自動再生を止めない
+        },
+        pagination: {
+          el: '.swiper-pagination', // ページネーションの要素
+          clickable: true, // クリックでスライドを切り替え
+        },
+        navigation: {
+          nextEl: '.swiper-button-next', // 「次へ」ボタンの要素
+          prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
+        },
+      });
+
+      async function setupInformation() {
+        const response = await fetch("info.json");
+        const informationData = await response.json();
+
+        // --- 設定項目 ---
+        const itemsPerPage = 4; // 1ページに表示するカードの数
+
+        // --- データを使ってカードのHTMLを生成し、card-listに追加 ---
+        const $cardList = $('.card-list'); // jQueryでは$を変数名に付ける慣習がある
+        $.each(informationData.slice(0,4), function(index, item) {
+          const cardHTML = `
+            <a href="${item.link}" class="card">
+              <article>
+                <img class="card-image" src="${item.img}" alt="">
+                <div class="card-content">
+                  <h3 class="card-title">${item.title}</h3>
+                  <time class="card-date" datetime="${item.date}">${item.displayDate}</time>
+                </div>
+              </article>
+            </a>
+          `;
+          $cardList.append(cardHTML); // card-listの末尾にHTMLを追加
+        });
+
+
+        }
+
+      $(function() { // ページが読み込まれたら実行する、jQueryのお作法
+      setupInformation();
+      $('.hamburger-menu').on('click', function() {
+      // ボタンとナビゲーションメニューに 'is-open' クラスを付け外し
+      $(this).toggleClass('is-open');
+      $('.header-nav').toggleClass('is-open');
+    });
+      });
+    </script>
+  </body>
+</html>

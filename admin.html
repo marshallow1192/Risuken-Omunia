@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>投稿用ページ</title>
+  <link rel="stylesheet" href="style.css">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <style>
+    /* 編集ページ専用のスタイル */
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .editor-container {
+      gap: 20px;
+      padding: 20px;
+    }
+    .form-area, .preview-area {
+      flex: 1; /* 左右のエリアが同じ幅になる */
+      padding: 20px;
+    }
+    .preview-area {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    input, textarea { width: 100%; margin-bottom: 10px; padding: 5px; box-sizing: border-box;}
+    textarea { height: 300px; }
+    #preview-image { max-width: 100%; margin: 20px 0; }
+    .edit {
+      display: inline;
+    }
+    .admin-button {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+}
+.admin-button:hover {
+  background-color: #eee;
+}
+.delete-btn {
+  color: #d93025; /* 削除ボタンは赤色に */
+  border-color: #d93025;
+}
+.delete-btn:hover {
+  background-color: #d93025;
+  color: #fff;
+}
+  </style>
+</head>
+<body>
+<div class="editor-container">
+  <div class="form-area">
+    <h1>お知らせ投稿フォーム</h1>
+    <form id="post-form">
+      <label>タイトル:20文字以内</label>
+      <input type="text" id="title" name="title" maxlength="20" required>
+
+      <label>日付 (YYYY-MM-DD):</label>
+      <input type="date" id="date" name="date" required>
+
+      <label>画像:</label>
+      <input type="file" id="image" name="image" accept="image/*">
+
+      <label>本文 (Markdown形式):</label>
+      <textarea id="contentMd" name="contentMd"></textarea>
+
+      <button type="submit">投稿する</button>
+    </form>
+  </div>
+
+  <div class="preview-area">
+    <h2>プレビュー</h2>
+    <article class="report-content">
+        <h2><span class="section-sub-title">Information</span></h2>
+        <h1><span id="preview-title">タイトルがここに表示されます</span></h1>
+        <time id="preview-date">2025年9月28日</time>
+        <img id="preview-image" src="" alt="プレビュー画像" style="display:none;">
+        <div id="preview-content" class="report-body">
+            <p>本文のプレビューがここに表示されます。</p>
+        </div>
+    </article>
+  </div>
+</div>
+<div class="edit">
+  <hr>
+<h2>既存のお知らせ一覧</h2>
+<ul id="post-list">
+  </ul>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+ $(function() {
+    // --- グローバル変数 ---
+    const API_URL = 'http://localhost:3000/api/posts';
+
+    // --- 関数定義 ---
+
+    // 記事一覧を読み込んで表示する関数
+    async function loadPosts() {
+        try {
+            const response = await fetch(API_URL);
+            const posts = await response.json();
+            const $list = $('#post-list');
+            $list.empty(); // 一覧をクリア
+
+            posts.forEach(post => {
+                // post.idNum が存在するか確認
+                const editLink = post.idNum ? `<a href="edit.html?id=${post.idNum}">[編集]</a>` : '[編集不可: IDなし]';
+                const $li = $(`
+      <li>
+        <span>${post.title} (${post.displayDate})</span>
+        <div>
+          <a href="edit.html?id=${post.idNum}" class="admin-button">[編集]</a>
+          <button class="admin-button delete-btn" data-id="${post.idNum}">[削除]</button>
+        </div>
+      </li>
+    `);
+                $list.append($li);
+            });
+        } catch (error) {
+            console.error('記事一覧の読み込みに失敗しました:', error);
+        }
+    }
+    // ...loadPosts関数の定義などの後...
+
+// 記事一覧(#post-list)の中の、.delete-btnがクリックされた時の処理
+$('#post-list').on('click', '.delete-btn', async function() {
+  // 1. 本当に削除して良いか確認する
+  if (!confirm('この記事を本当に削除しますか？元に戻せません。')) {
+    return; // キャンセルされたら何もしない
+  }
+
+  // 2. ボタンに埋め込まれたIDを取得
+  const postId = $(this).data('id');
+
+  // 3. サーバーにDELETEリクエストを送信
+  try {
+    const response = await fetch(`${API_URL}/${postId}`, {
+      method: 'DELETE',
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    if (response.ok) {
+      loadPosts(); // 削除に成功したら、記事一覧を再読み込みして表示を更新
+    }
+  } catch (error) {
+    alert('削除中にエラーが発生しました。');
+    console.error(error);
+  }
+});
+
+    // プレビューを更新する関数
+    function updatePreview() {
+        const title = $('#title').val();
+        const date = $('#date').val();
+        const contentMd = $('#contentMd').val();
+        const imageInput = $('#image')[0];
+
+        let displayDate = '公開日 : YYYY年M月D日';
+        if (date) {
+            const d = new Date(date);
+            displayDate = `公開日 : ${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+        
+        $('#preview-title').text(title || 'タイトルがここに表示されます');
+        $('#preview-date').text(displayDate);
+        $('#preview-content').html(marked.parse(contentMd || ''));
+
+        if (imageInput.files && imageInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => $('#preview-image').attr('src', e.target.result).show();
+            reader.readAsDataURL(imageInput.files[0]);
+        } else {
+            $('#preview-image').hide();
+        }
+    }
+
+    // フォームを送信する関数
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const date = new Date(formData.get('date'));
+        const displayDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        formData.append('displayDate', displayDate);
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+            alert(result.message);
+            if (response.ok) {
+                form.reset();
+                updatePreview(); // プレビューもリセット
+                loadPosts();   // 投稿成功後、一覧を再読み込み
+            }
+        } catch (error) {
+            console.error('送信エラー:', error);
+            alert('投稿の送信に失敗しました。');
+        }
+    }
+
+    // --- イベントリスナーの設定 ---
+    $('#post-form input, #post-form textarea').on('input', updatePreview);
+    $('#post-form').on('submit', handleFormSubmit);
+
+    // --- 初期化処理 ---
+    loadPosts();
+    updatePreview();
+});
+    </script>
+  </body>
+</html>
