@@ -16,14 +16,21 @@
   </head>
   <body class="article">
     <header>
-      <h1>りすけん Omunia</h1>
-      <nav>
+      <h1 class="site-logo">
+      <a href="index.html">りすけん Omunia</a>
+    </h1>
+      <nav class="header-nav">
         <ul class="menu-group">
-          <li class="menu-items">どんなサークル？ </li>
-          <li class="menu-items">自主ゼミ一覧</li>
-          <li class="menu-items">おしらせ</li>
+          <li class="menu-items"><a href="introduction.html">どんなサークル？ </a></li>
+          <li class="menu-items"><a href="#">自主ゼミ一覧</a></li>
+          <li class="menu-items"><a href="information.html">お知らせ</a></li>
         </ul>
       </nav>
+      <button class="hamburger-menu" aria-label="メニューを開く">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
     </header>
 
     <main class="infoContainer">
@@ -61,7 +68,7 @@
   <div class="copyright">
     <small>&copy; 2025 大坂公立大学 理数工学研究会Omunia.</small>
   </div>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
       const swiper = new Swiper('.swiper', {
@@ -80,6 +87,42 @@
           nextEl: '.swiper-button-next', // 「次へ」ボタンの要素
           prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
         },
+      });
+
+      async function setupInformation() {
+        const response = await fetch("info.json");
+        const informationData = await response.json();
+
+        // --- 設定項目 ---
+        const itemsPerPage = 4; // 1ページに表示するカードの数
+
+        // --- データを使ってカードのHTMLを生成し、card-listに追加 ---
+        const $cardList = $('.card-list'); // jQueryでは$を変数名に付ける慣習がある
+        $.each(informationData.slice(0,4), function(index, item) {
+          const cardHTML = `
+            <a href="${item.link}" class="card">
+              <article>
+                <img class="card-image" src="${item.img}" alt="">
+                <div class="card-content">
+                  <h3 class="card-title">${item.title}</h3>
+                  <time class="card-date" datetime="${item.date}">${item.displayDate}</time>
+                </div>
+              </article>
+            </a>
+          `;
+          $cardList.append(cardHTML); // card-listの末尾にHTMLを追加
+        });
+
+
+        }
+
+      $(function() { // ページが読み込まれたら実行する、jQueryのお作法
+      setupInformation();
+      $('.hamburger-menu').on('click', function() {
+      // ボタンとナビゲーションメニューに 'is-open' クラスを付け外し
+      $(this).toggleClass('is-open');
+      $('.header-nav').toggleClass('is-open');
+    });
       });
     </script>
   </body>

@@ -147,6 +147,11 @@
 
       $(function() { // ページが読み込まれたら実行する、jQueryのお作法
       setupInformation();
+      $('.hamburger-menu').on('click', function() {
+      // ボタンとナビゲーションメニューに 'is-open' クラスを付け外し
+      $(this).toggleClass('is-open');
+      $('.header-nav').toggleClass('is-open');
+    });
       });
     </script>
   </body>
