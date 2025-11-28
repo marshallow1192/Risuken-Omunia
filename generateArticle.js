@@ -6,7 +6,7 @@ const { marked } = require('marked'); // ← markedを読み込む
 console.log('HTMLファイルの生成を開始します...');
 
 // 1. データのJSONファイルを読み込む
-const data = JSON.parse(fs.readFileSync('info.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('docs/info.json', 'utf8'));
 
 // 2. テンプレートファイルを読み込む
 const template = fs.readFileSync('articleTemplate.ejs', 'utf8');
@@ -30,7 +30,7 @@ data.forEach(item => {
   const renderedHtml = ejs.render(template, renderData);
   
   // 出力するファイルパスを指定
-  const outputFilePath = item.link;
+  const outputFilePath = "docs/"+item.link;
   
   // HTMLファイルとして書き出す
   fs.writeFileSync(outputFilePath, renderedHtml, 'utf8');

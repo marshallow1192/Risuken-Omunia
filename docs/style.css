@@ -546,6 +546,7 @@ hr {
 .infoContainer {
   margin:0 0;
   padding-top: 80px;
+  padding-bottom: 80px;
   padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
   padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);
   background-color:rgba(240, 245, 255, 0.5);
@@ -554,6 +555,7 @@ hr {
 
 .reportContents {
   margin:0 0;
+  padding-bottom: 80px;
   padding-top: clamp(1.5rem, 0.5rem + 5vw, 5rem);
   padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
   padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);

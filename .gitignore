@@ -1,0 +1,5 @@
+# Node.js関連のフォルダ
+node_modules/
+
+# OSが自動生成するファイル
+.DS_Store

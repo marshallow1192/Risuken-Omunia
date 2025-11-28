@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.diskStorage({
   // ファイルの保存先を指定
   destination: function (req, file, cb) {
-    cb(null, '../img/'); // ルートのuploadsフォルダを指定
+    cb(null, '../docs/img/'); // ルートのuploadsフォルダを指定
   },
   // ファイル名を指定 (ファイル名の重複を防ぐため、タイムスタンプを付与)
   filename: function (req, file, cb) {
@@ -42,12 +42,12 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 
   // 2. アップロードされた画像のパスを追加
   if (req.file) {
-    newPost.img = `/img/${req.file.filename}`;
+    newPost.img = `img/${req.file.filename}`;
   } else {
-    newPost.img = '/img/activity-default.jpg'; // 画像がない場合のデフォルト
+    newPost.img = 'img/activity-default.jpg'; // 画像がない場合のデフォルト
   }
 
-  const dataPath = path.join(__dirname, '..', 'info.json');
+  const dataPath = path.join(__dirname, '..', 'docs/info.json');
 
   try {
     const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
@@ -66,9 +66,10 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 });
 
 app.get('/api/posts', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'info.json');
+  const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const data = fs.readFileSync(dataPath, 'utf8');
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
     res.status(200).json(JSON.parse(data));
   } catch (error) {
     res.status(500).json({ message: 'データの読み込みに失敗しました。' });
@@ -79,7 +80,7 @@ app.get('/api/posts', (req, res) => {
 
 // GETリクエストを '/api/posts/:id' というURLで受け付ける (一件取得用)
 app.get('/api/posts/:id', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'info.json');
+  const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     // URLの:idと一致する記事を探す
@@ -95,7 +96,7 @@ app.get('/api/posts/:id', (req, res) => {
 });
 
 app.put('/api/posts/:id', upload.single('image'), (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'info.json');
+  const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     const postIndex = allPosts.findIndex(p => p.idNum == req.params.id);
@@ -123,7 +124,7 @@ app.put('/api/posts/:id', upload.single('image'), (req, res) => {
 });
 
 app.delete('/api/posts/:id', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'info.json');
+  const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
