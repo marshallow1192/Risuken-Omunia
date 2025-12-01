@@ -607,7 +607,7 @@ hr {
 
   /* 画像も画面からはみ出さないように念のため指定 */
   .contents img, .markdown-body img {
-    max-width: 100%;
+    max-width: 80%;
     height: auto;
   }
 }
