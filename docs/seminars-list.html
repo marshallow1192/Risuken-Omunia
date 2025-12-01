@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>りすけん お知らせ | 大阪公立大学 自主ゼミサークル理数工学研究会 Omunia</title>
+    <title>サークル紹介 | 大阪公立大学 自主ゼミサークル理数工学研究会</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 使用するフォントの取り込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
   </head>
-  <body class="article">
+  <body class="intro">
     <header>
       <h1 class="site-logo">
       <a href="index.html">りすけん Omunia</a>
@@ -32,23 +32,21 @@
       <span></span>
     </button>
     </header>
+<div class="introduction">
 
-    <main class="infoContainer">
-      <article class="reportContents">
-        <h2><span class="section-sub-title">Information</span></h2>
-        <h1><span class="section-title-information"> 森之宮キャンパスに行ってみました！！ </span></h1>
-        <hr>
-        <p class="displayDate">公開日 : 2025年9月27日</p>
+  <section class="seminar-section">
+    <h2><span class="section-sub-title">Active Seminars</span></h2>
+    <h1><span class="section-title-seminarslist">自主ゼミ一覧</span></h1>
+    <div id="active-seminar-list" class="seminar-grid"></div>
+  </section>
 
-        <img class="topImage" src=img/1764296082998-G1lczdgaoAEJjK5.jpeg>
-        <div class="contents">
-          <h1>森ノ宮キャンパス一足先に行ってみました！</h1>
-<p>思っていたより広くて、教室も充実しているので快適に活動できそうです！！</p>
+  <section class="seminar-section past-section">
+    <h2><span class="section-sub-title">Past Seminars</span></h2>
+    <h1><span class="section-title-seminarslist">過去に開催された自主ゼミ一覧</span></h1>
+    <div id="past-seminar-list" class="seminar-grid"></div>
+  </section>
 
-        </div>
-      </article>
-    </main>
-
+</div>
   <div class="belt">
     <h2><span class="belt-items">興味のある方はメールやDMにてお気軽にご連絡ください！</span></h2>
   </div>
@@ -91,33 +89,54 @@
           prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
         },
       });
+async function loadSeminars() {
+  const response = await fetch("seminars.json");
+  const seminars = await response.json();
 
-      async function setupInformation() {
-        const response = await fetch("info.json");
-        const informationData = await response.json();
+  // 1. データを2つに振り分ける
+  const activeSeminars = seminars.filter(item => item.status !== "終了");
+  const pastSeminars = seminars.filter(item => item.status === "終了");
 
-        // --- 設定項目 ---
-        const itemsPerPage = 4; // 1ページに表示するカードの数
+  // 2. それぞれの場所（ID）にHTMLを生成して入れる
+  renderGrid(activeSeminars, 'active-seminar-list');
+  renderGrid(pastSeminars, 'past-seminar-list');
+}
 
-        // --- データを使ってカードのHTMLを生成し、card-listに追加 ---
-        const $cardList = $('.card-list'); // jQueryでは$を変数名に付ける慣習がある
-        $.each(informationData.slice(0,4), function(index, item) {
-          const cardHTML = `
-            <a href="${item.link}" class="card">
-              <article>
-                <img class="card-image" src="${item.img}" alt="">
-                <div class="card-content">
-                  <h3 class="card-title">${item.title}</h3>
-                  <time class="card-date" datetime="${item.date}">${item.displayDate}</time>
-                </div>
-              </article>
-            </a>
-          `;
-          $cardList.append(cardHTML); // card-listの末尾にHTMLを追加
-        });
+// HTML生成用の共通関数（何度も書かなくて済むように分離！）
+function renderGrid(dataList, targetId) {
+  const $list = document.getElementById(targetId);
+  if (!$list) return; // エレメントが無ければ何もしない
 
+  const html = dataList.map(item => {
+    // タグの生成
+    const tagsHtml = item.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+    // ステータスによってバッジの色を変えるクラス名
+    let badgeClass = '';
+    if (item.status === '募集中') badgeClass = 'recruit';
+    if (item.status === '終了') badgeClass = 'finished';
 
-        }
+    return `
+      <article class="seminar-card">
+        <div class="card-image">
+          <img src="${item.image}" alt="${item.title}">
+          <span class="status-badge ${badgeClass}">${item.status}</span>
+        </div>
+        <div class="card-content">
+          <div class="card-tags">${tagsHtml}</div>
+          <h3 class="card-title">${item.title}</h3>
+          <p class="card-info"><i class="fa-regular fa-clock"></i> ${item.day}</p>
+          <p class="card-info"><i class="fa-solid fa-location-dot"></i> ${item.place}</p>
+          <p class="card-desc">${item.description}</p>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  $list.innerHTML = html;
+}
+
+// ページ読み込み時に実行
+document.addEventListener('DOMContentLoaded', loadSeminars);
 
       $(function() { // ページが読み込まれたら実行する、jQueryのお作法
       setupInformation();
