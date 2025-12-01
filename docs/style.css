@@ -438,10 +438,11 @@ body{
 .contact{
   padding-top: 10px;
   padding-bottom: 30px;
-  padding-left: 100px;
+  padding-left: 80px;
   padding-right: 80px;
   background-color:rgba(240, 245, 255, 0.5);
   text-align: center;
+  justify-content: center;
 }
 
 .section-sub-title-contact {
@@ -451,6 +452,7 @@ body{
   font-size: 25px;
   border-bottom: 3px solid #1f1f1f;
   padding-bottom: 2px;
+  justify-content: center;
 }
 
 /* --- フッター全体のスタイル --- */
