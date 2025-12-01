@@ -578,12 +578,38 @@ hr {
 .topImage {
   display: block;
   text-align: center;
-  width: 50%;
 }
 
 .contents {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 20px;
+}
+
+/* ▼▼▼ スマホ向けの調整（画面幅が768px以下の場合） ▼▼▼ */
+@media screen and (max-width: 768px) {
+
+  /* 記事本文の文字サイズを小さくする */
+  .contents, .markdown-body {
+    font-size: 12px;       /* PCより少し小さく（PCは通常16px） */
+    line-height: 1.6;      /* 行間も少し詰める */
+  }
+
+  /* 見出し（h1, h2）もスマホだと大きすぎるので調整 */
+  .contents h1, .markdown-body h1 {
+    font-size: 20px;       /* 大見出し */
+    margin-top: 30px;
+  }
+
+  .contents h2, .markdown-body h2 {
+    font-size: 18px;       /* 中見出し */
+    margin-top: 20px;
+  }
+
+  /* 画像も画面からはみ出さないように念のため指定 */
+  .contents img, .markdown-body img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 .br-sp {
