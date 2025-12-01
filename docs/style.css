@@ -393,7 +393,7 @@ body{
   padding: 12px 24px;
   border-radius: 50px; /* 角を完全に丸くして、カプセル型に */
   text-decoration: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   transition: all 0.3s;
 }
