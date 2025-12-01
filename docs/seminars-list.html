@@ -67,7 +67,7 @@
     </div>
   </div>
   <div class="copyright">
-    <small>&copy; 2025 大坂公立大学 理数工学研究会Omunia.</small>
+    <small>&copy; 2025 大阪公立大学 理数工学研究会Omunia.</small>
   </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -136,10 +136,7 @@ function renderGrid(dataList, targetId) {
   $list.innerHTML = html;
 }
 
-// ページ読み込み時に実行
-document.addEventListener('DOMContentLoaded', loadSeminars);
-
-      $(function() { // ページが読み込まれたら実行する、jQueryのお作法
+$(function() { // ページが読み込まれたら実行する、jQueryのお作法
       setupInformation();
       $('.hamburger-menu').on('click', function() {
       // ボタンとナビゲーションメニューに 'is-open' クラスを付け外し
@@ -147,6 +144,10 @@ document.addEventListener('DOMContentLoaded', loadSeminars);
       $('.header-nav').toggleClass('is-open');
     });
       });
+
+// ページ読み込み時に実行
+document.addEventListener('DOMContentLoaded', loadSeminars);
+
     </script>
   </body>
 </html>

@@ -604,14 +604,13 @@ hr {
     font-size: 18px;       /* 中見出し */
     margin-top: 20px;
   }
-
-  /* 画像も画面からはみ出さないように念のため指定 */
-  .contents img, .markdown-body img {
-    max-width: 80%;
-    height: auto;
-  }
 }
-
+/* 記事エリア内のすべての画像に対するルール */
+.reportContents img {
+  max-width: 100%;  /* 幅は親要素（記事の幅）に合わせる、それ以上大きくならない */
+  height: auto;     /* 高さは幅に合わせて自動調整（縦横比を崩さない） */
+  object-fit: contain; /* 画像全体が収まるように表示 */
+}
 .br-sp {
   display: inline;
 }
