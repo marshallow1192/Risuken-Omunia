@@ -38,6 +38,7 @@
   {
     "idNum": 2,
     "link": "report2.html",
+    "date": "2025-04-12",
     "img": "img/articleimg/slide2.jpg",
     "title": "本日線形代数ゼミが開催されました！",
     "displayDate": "2025年4月12日",
@@ -46,6 +47,7 @@
   {
     "idNum": 1,
     "link": "report1.html",
+    "date": "2025-04-12",
     "img": "img/articleimg/slide1.webp",
     "title": "本日量子力学ゼミが開催されました！",
     "displayDate": "2025年4月12日",
