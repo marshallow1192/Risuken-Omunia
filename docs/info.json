@@ -1,10 +1,19 @@
 [
   {
+    "title": "本日 量子力学ゼミが開催されました！！",
+    "date": "2025-12-04",
+    "contentMd": "## 本日 森之宮キャンパスにて量子力学ゼミが開催されました！！\r\n教科書は 著 谷村省吾先生 の [量子力学10講](https://www.unp.or.jp/ISBN/ISBN978-4-8158-1049-8.html)を使用しています！！\r\n\r\n今日は教科書 第二講七章から第三講の手前まで扱いました！！\r\n\r\n![画像の説明](docs/img/articleimg/1764894648397-IMG_4286.jpg)\r\n\r\n### このゼミは森之宮キャンパスにて毎週木曜日三限に行われていますのでご興味ありましたらぜひ途中からでも大丈夫なのでぜひご参加ください！！！",
+    "displayDate": "2025年12月4日",
+    "img": "img/1764896131989-IMG_4285.jpg",
+    "idNum": 6,
+    "link": "report6.html"
+  },
+  {
     "title": "中原トポロジーゼミが開催されます！！",
     "date": "2025-11-05",
     "contentMd": "## 本日より中原トポロジーゼミが開催されます！！\r\n使用教科書は 著 中原 幹夫先生 約 佐久間 一浩先生の 「理論物理学のための幾何学とトポロジーI」です！！\r\n### 今回のゼミには外部の方も参加されています！！",
     "displayDate": "2025年11月5日",
-    "img": "img/1764295846016-G49IupmbQAUHrWh.jpeg",
+    "img": "img/articleimg/1764295846016-G49IupmbQAUHrWh.jpeg",
     "idNum": 4,
     "link": "report4.html"
   },
@@ -13,23 +22,23 @@
     "date": "2025-10-07",
     "contentMd": "## 本日プログラミングゼミが開催されました！！\r\nこのゼミでは， 東京大学 数理・情報教育研究センター様により公開されているpythonプログラミング入門というサイトを用いています！！\r\n\r\n今日は3-2のループについて扱いました！！\r\n\r\n",
     "displayDate": "2025年10月7日",
-    "img": "img/1759799389330-test.png",
+    "img": "img/articleimg/1759799389330-test.png",
     "idNum": 3,
     "link": "report3.html"
   },
-    {
+  {
     "title": "森之宮キャンパスに行ってみました！！",
     "date": "2025-09-27",
     "contentMd": "# 森ノ宮キャンパス一足先に行ってみました！\r\n思っていたより広くて、教室も充実しているので快適に活動できそうです！！",
     "displayDate": "2025年9月27日",
-    "img": "img/1764296082998-G1lczdgaoAEJjK5.jpeg",
+    "img": "img/articleimg/1764296082998-G1lczdgaoAEJjK5.jpeg",
     "idNum": 5,
     "link": "report5.html"
   },
   {
     "idNum": 2,
     "link": "report2.html",
-    "img": "img/slide2.jpg",
+    "img": "img/articleimg/slide2.jpg",
     "title": "本日線形代数ゼミが開催されました！",
     "displayDate": "2025年4月12日",
     "contentMd": "<p>本日，森ノ宮キャンパスにて線形代数ゼミが行われました！<br>教科書は斎藤先生の線型代数入門を使用しています！</p>"
@@ -37,7 +46,7 @@
   {
     "idNum": 1,
     "link": "report1.html",
-    "img": "img/slide1.webp",
+    "img": "img/articleimg/slide1.webp",
     "title": "本日量子力学ゼミが開催されました！",
     "displayDate": "2025年4月12日",
     "contentMd": "<p>本日，森ノ宮キャンパスにて量子力学ゼミが行われました！<br>教科書は砂川先生の量子力学を使用しています！</p>"

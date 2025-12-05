@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <title>投稿用ページ</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../docs/style.css">
 <link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
   
   <link rel="apple-touch-icon" href="img/favicon.png">
@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
     /* 編集ページ専用のスタイル */
     body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
@@ -53,15 +54,25 @@
   background-color: #d93025;
   color: #fff;
 }
+#preview-content img {
+  max-width: 100%;  /* 親要素(プレビュー枠)より大きくならないようにする */
+  height: auto;     /* 高さは自動調整して比率を保つ */
+  border-radius: 4px; /* おまけ：少し角を丸くすると見やすい */
+  display: block;     /* おまけ：変な隙間をなくす */
+  margin: 10px 0;     /* おまけ：上下に少し余白を入れる */
+}
   </style>
 </head>
 <body>
+<div style="text-align: right; max-width: 800px; margin: 10px auto;">
+
+</div>
 <div class="editor-container">
   <div class="form-area">
     <h1>お知らせ投稿フォーム</h1>
-    <form id="post-form">
-      <label>タイトル:20文字以内</label>
-      <input type="text" id="title" name="title" maxlength="20" required>
+    <form id="post-form" onsubmit="return false;">
+      <label>タイトル:40文字以内</label>
+      <input type="text" id="title" name="title" maxlength="40" required>
 
       <label>日付 (YYYY-MM-DD):</label>
       <input type="date" id="date" name="date" required>
@@ -70,6 +81,12 @@
       <input type="file" id="image" name="image" accept="image/*">
 
       <label>本文 (Markdown形式):</label>
+      <div class="editor-toolbar" style="margin-bottom: 5px;">
+        <label style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; font-size: 14px;">
+          <i class="fa-solid fa-image"></i> 本文に画像を挿入
+          <input type="file" id="body-image-upload" style="display: none;" accept="image/*">
+        </label>
+      </div>
       <textarea id="contentMd" name="contentMd"></textarea>
 
       <button type="submit">投稿する</button>
@@ -219,6 +236,48 @@ $('#post-list').on('click', '.delete-btn', async function() {
     // --- イベントリスナーの設定 ---
     $('#post-form input, #post-form textarea').on('input', updatePreview);
     $('#post-form').on('submit', handleFormSubmit);
+
+    // 2. 本文への画像挿入機能
+    $('#body-image-upload').on('change', async function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch('http://localhost:3000/api/upload-image', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('アップロード失敗');
+
+        const result = await response.json();
+        const imageUrl = result.url;
+
+        // カーソル位置にMarkdownを挿入
+        const $textarea = $('#contentMd');
+        const textarea = $textarea[0];
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter  = textarea.value.substring(cursorPos);
+
+        // 挿入するテキスト
+        const insertText = `\n![画像の説明](${imageUrl})\n`;
+
+        textarea.value = textBefore + insertText + textAfter;
+
+        // プレビューを更新
+        updatePreview();
+
+      } catch (error) {
+        console.error(error);
+        alert('画像のアップロードに失敗しました');
+      }
+      // 同じファイルを連続で選べるようにリセット
+      $(this).val('');
+    });
 
     // --- 初期化処理 ---
     loadPosts();

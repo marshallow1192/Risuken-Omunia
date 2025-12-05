@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer'); // multerを読み込む
+const crypto = require('crypto'); // ← これを追加（インストール不要、標準機能です）
 
 const app = express();
 const port = 3000;
@@ -12,11 +13,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const getFileHash = (filePath) => {
+  const fileBuffer = fs.readFileSync(filePath);
+  const hashSum = crypto.createHash('sha256');
+  hashSum.update(fileBuffer);
+  return hashSum.digest('hex');
+};
+
 // ▼▼▼ multerの設定 ▼▼▼
 const storage = multer.diskStorage({
   // ファイルの保存先を指定
   destination: function (req, file, cb) {
-    cb(null, '../docs/img/'); // ルートのuploadsフォルダを指定
+    cb(null, path.join(__dirname, '../docs/img/articleimg/')); // ルートのuploadsフォルダを指定
   },
   // ファイル名を指定 (ファイル名の重複を防ぐため、タイムスタンプを付与)
   filename: function (req, file, cb) {
@@ -28,8 +36,63 @@ const upload = multer({ storage: storage });
 
 // ▼▼▼ uploadsフォルダを静的ファイルとして配信する設定 ▼▼▼
 // これにより http://localhost:3000/uploads/画像ファイル名 でアクセスできる
-app.use('/img', express.static(path.join(__dirname, '..', 'img')));
+app.use('/img', express.static(path.join(__dirname, '../docs/img')));
 
+// ▼▼▼ 【修正版】画像アップロード用API（重複チェック機能付き） ▼▼▼
+app.post('/api/upload-image', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'ファイルがありません' });
+  }
+
+  const newFilePath = req.file.path; // 今保存されたファイルのパス
+  const imgDir = path.dirname(newFilePath); // 保存先フォルダ (docs/img)
+
+  try {
+    // 1. 今アップロードされたファイルの「指紋（ハッシュ）」と「サイズ」を取得
+    const newFileHash = getFileHash(newFilePath);
+    const newFileSize = req.file.size;
+
+    // 2. フォルダ内の他のファイルをチェック
+    const files = fs.readdirSync(imgDir);
+
+    for (const file of files) {
+      // 自分自身（今保存したファイル）はスキップ
+      if (file === req.file.filename) continue;
+
+      const existingFilePath = path.join(imgDir, file);
+      
+      // フォルダかファイルか確認（念のため）
+      const stats = fs.statSync(existingFilePath);
+      if (!stats.isFile()) continue;
+
+      // 【高速化】まずはファイルサイズが同じかチェック（サイズが違えば中身も絶対違うから）
+      if (stats.size !== newFileSize) continue;
+
+      // サイズが同じ場合だけ、中身（指紋）を計算して比較
+      const existingHash = getFileHash(existingFilePath);
+
+      if (newFileHash === existingHash) {
+        // ★★★ 重複発見！ ★★★
+        console.log(`重複画像が見つかりました: ${file} と同じです。新しいファイルを削除します。`);
+
+        // 3. 今アップロードしたファイルを削除（無かったことにする）
+        fs.unlinkSync(newFilePath);
+
+        // 4. 代わりに「昔からあるファイル」のパスを返す
+        return res.json({ url: 'docs/img/articleimg/' + file });
+      }
+    }
+
+    // 重複がなければ、そのまま新しいファイルのパスを返す
+    const imagePath = 'docs/img/articleimg/' + req.file.filename;
+    res.json({ url: imagePath });
+
+  } catch (error) {
+    console.error('重複チェック中にエラー:', error);
+    // エラーが出てもとりあえずアップロードは成功にしておく（安全策）
+    res.json({ url: 'docs/img/articleimg/' + req.file.filename });
+  }
+});
 
 // ▼▼▼ POSTリクエストのルートを修正 ▼▼▼
 // upload.single('image') ミドルウェアを追加
@@ -49,9 +112,12 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 
   const dataPath = path.join(__dirname, '..', 'docs/info.json');
 
+const aryMax = function (a, b) {return Math.max(a, b);}
+
   try {
     const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    const idNum = currentData[0]["idNum"]+1;
+    let idNumList = currentData.map(item => item.idNum);
+    const idNum = idNumList.reduce(aryMax)+1;
     newPost.idNum = idNum;
     newPost.link = `report${idNum}.html`;
     currentData.unshift(newPost); // 新しい投稿を配列の先頭に追加
@@ -66,12 +132,17 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 });
 
 app.get('/api/posts', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'docs/info.json');
+  const dataPath = path.join(__dirname, '../docs/info.json'); // パスも念のため修正
   try {
-    const data = fs.readFileSync(dataPath, 'utf8');
-    data.sort((a, b) => new Date(b.date) - new Date(a.date));
-    res.status(200).json(JSON.parse(data));
+    const rawData = fs.readFileSync(dataPath, 'utf8');
+    const posts = JSON.parse(rawData); // ★先にJSON（配列）に変換する！
+
+    // 配列になってからソートする
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.status(200).json(posts);
   } catch (error) {
+    console.error(error); // エラー内容をログに出すようにしておくと便利
     res.status(500).json({ message: 'データの読み込みに失敗しました。' });
   }
 });
@@ -159,6 +230,66 @@ app.delete('/api/posts/:id', (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'サーバーエラー' });
+  }
+});
+
+// ▼▼▼ 未使用画像の削除（お掃除）API ▼▼▼
+app.delete('/api/images/cleanup', (req, res) => {
+  const imgDir = path.join(__dirname, '../docs/img');
+  const dataPath = path.join(__dirname, '../docs/info.json');
+
+  // 1. 絶対に消したくないファイル（faviconなど）
+  const keepFiles = ['favicon.png', 'activity-default.jpg', '.gitkeep'];
+
+  try {
+    // フォルダ内の全ファイルを取得
+    const allFiles = fs.readdirSync(imgDir);
+    
+    // info.json から「使用中の画像」を洗い出す
+    const posts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const usedImages = new Set(keepFiles); // 消さないファイルもセットに追加
+
+    posts.forEach(post => {
+      // (A) サムネイル画像 (post.img)
+      if (post.img) {
+        // "img/filename.jpg" から "filename.jpg" だけ取り出す
+        const filename = path.basename(post.img);
+        usedImages.add(filename);
+      }
+      
+      // (B) 本文内の画像 (Markdown: ![alt](img/xxx.jpg))
+      if (post.contentMd) {
+        // 正規表現で "img/..." を探し出す
+        const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.]+/g);
+        if (matches) {
+          matches.forEach(match => {
+             const filename = path.basename(match);
+             usedImages.add(filename);
+          });
+        }
+      }
+    });
+
+    // 削除処理実行
+    let deletedCount = 0;
+    allFiles.forEach(file => {
+      // ファイルかどうか確認（フォルダは無視）
+      const filePath = path.join(imgDir, file);
+      if (!fs.statSync(filePath).isFile()) return;
+
+      // 「使われているリスト」になければ削除！
+      if (!usedImages.has(file)) {
+        fs.unlinkSync(filePath);
+        console.log(`未使用画像を削除しました: ${file}`);
+        deletedCount++;
+      }
+    });
+
+    res.json({ message: `${deletedCount} 個の未使用画像を削除しました！` });
+
+  } catch (error) {
+    console.error('お掃除中にエラー:', error);
+    res.status(500).json({ message: '画像のお掃除に失敗しました。' });
   }
 });
 

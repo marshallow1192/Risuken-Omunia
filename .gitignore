@@ -1,5 +1,7 @@
 # Node.js関連のフォルダ
 node_modules/
 
+.vscode/
+
 # OSが自動生成するファイル
 .DS_Store

@@ -4,22 +4,66 @@
     <title>記事編集ページ</title>
     <link rel="stylesheet" href="style.css">
 <link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
-  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="apple-touch-icon" href="img/favicon.png">
 <meta name="google-site-verification" content="FopI5soj9MaN8IgVC_4FoFFB4G7aFBI3CIDFDqXmuvY" />
     <style>
-      body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-      input, textarea { width: 100%; margin-bottom: 10px; padding: 5px; box-sizing: border-box;}
-      textarea { height: 300px; }
-      .current-image { max-width: 200px; display: block; margin-bottom: 10px; }
-    </style>
+    /* 編集ページ専用のスタイル */
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .editor-container {
+      gap: 20px;
+      padding: 20px;
+    }
+    .form-area, .preview-area {
+      flex: 1; /* 左右のエリアが同じ幅になる */
+      padding: 20px;
+    }
+    .preview-area {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    input, textarea { width: 100%; margin-bottom: 10px; padding: 5px;}
+    textarea { height: 300px; }
+    #preview-image { max-width: 100%; margin: 20px 0; }
+    .edit {
+      display: inline;
+    }
+    .admin-button {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+}
+.admin-button:hover {
+  background-color: #eee;
+}
+.delete-btn {
+  color: #d93025; /* 削除ボタンは赤色に */
+  border-color: #d93025;
+}
+.delete-btn:hover {
+  background-color: #d93025;
+  color: #fff;
+}
+#preview-content img {
+  max-width: 100%;  /* 親要素(プレビュー枠)より大きくならないようにする */
+  height: auto;     /* 高さは自動調整して比率を保つ */
+  border-radius: 4px; /* おまけ：少し角を丸くすると見やすい */
+  display: block;     /* おまけ：変な隙間をなくす */
+  margin: 10px 0;     /* おまけ：上下に少し余白を入れる */
+}
+  </style>
 </head>
 <body>
   <div class="editor-container">
     <h1>記事編集フォーム</h1>
     <form id="edit-form">
-      <label>タイトル:20文字以内</label>
-      <input type="text" id="title" name="title" maxlength="20" required>
+      <label>タイトル:40文字以内</label>
+      <input type="text" id="title" name="title" maxlength="40" required>
 
       <label>日付 (YYYY-MM-DD):</label>
       <input type="date" id="date" name="date" required>
@@ -30,6 +74,12 @@
       <input type="file" id="image" name="image" accept="image/*">
 
       <label>本文 (Markdown形式):</label>
+
+      <label style="cursor: pointer; background: #17a2b8; color: white; padding: 5px 10px; font-size: 14px; border-radius: 4px; display: inline-block;">
+          <i class="fa-solid fa-image"></i> 本文に画像を挿入
+          <input type="file" id="body-image-upload" style="display: none;" accept="image/*" onclick="event.stopPropagation()">
+        </label>
+
       <textarea id="contentMd" name="contentMd"></textarea>
 
       <button type="submit">更新する</button>
@@ -98,16 +148,23 @@
     try {
         const response = await fetch(`${API_URL}/${postId}`);
         if (!response.ok) throw new Error('記事データの取得に失敗しました。');
-        
+
         const postData = await response.json();
-        
+
         $('#title').val(postData.title);
         $('#date').val(postData.date);
         $('#contentMd').val(postData.contentMd);
-        
+
         // 既存の画像があればプレビューに表示
-        if (postData.image) {
-          $('#preview-image').attr('src', `http://localhost:3000${postData.image}`).show();
+        const currentImgPath = postData.img || postData.image;
+
+        // 2. 画像があればプレビューに表示
+        if (currentImgPath) {
+            // 現在の画像パスを表示（デバッグ用にもなる）
+            //$('#current-image').attr('src', `http://localhost:3000/${currentImgPath}`);
+
+            // プレビューエリアにも表示（スラッシュを忘れずに！）
+            $('#preview-image').attr('src', `http://localhost:3000/${currentImgPath}`).show();
         }
 
         // ▼▼▼ データをフォームにセットした後に、プレビューを一度更新 ▼▼▼
@@ -121,7 +178,74 @@
     // --- イベントリスナー ---
     // 入力があるたびにプレビューを更新
     $('#edit-form input, #edit-form textarea').on('input', updatePreview);
-    
+
+$('#body-image-upload').on('change', async function(event) {
+        event.stopPropagation(); // 念のためここでも止める
+        const file = this.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('http://localhost:3000/api/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('アップロード失敗');
+
+            const result = await response.json();
+            const imageUrl = result.url;
+
+            // カーソル位置にMarkdownを挿入
+            const $textarea = $('#contentMd');
+            const textarea = $textarea[0];
+            const cursorPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, cursorPos);
+            const textAfter = textarea.value.substring(cursorPos);
+
+            // 挿入するテキスト
+            const insertText = `\n![画像の説明](${imageUrl})\n`;
+
+            textarea.value = textBefore + insertText + textAfter;
+
+            // プレビューを更新
+            updatePreview();
+
+        } catch (error) {
+            console.error(error);
+            alert('画像のアップロードに失敗しました');
+        }
+        // 同じファイルを連続で選べるようにリセット
+        $(this).val('');
+    });
+
+    // 2. サイト生成（更新）ボタンの処理
+    $('#generate-btn').on('click', async function() {
+        if (!confirm('記事ページを再生成して、サイトを更新しますか？')) return;
+
+        const $btn = $(this);
+        const originalText = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 更新中...');
+
+        try {
+            const response = await fetch('http://localhost:3000/api/generate', { method: 'POST' });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message);
+            } else {
+                alert('エラー: ' + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('通信エラーが発生しました。');
+        } finally {
+            $btn.prop('disabled', false).html(originalText);
+        }
+    });
+
     // --- フォーム送信（更新）の処理 ---
     $('#edit-form').on('submit', async function(event) {
         event.preventDefault();
