@@ -70,6 +70,9 @@
 <div class="editor-container">
   <div class="form-area">
     <h1>お知らせ投稿フォーム</h1>
+    <button id="generate-btn" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      <i class="fa-solid fa-rotate"></i> サイトを更新して公開する
+    </button>
     <button id="cleanup-btn" class="admin-button" style="background-color: #6c757d; color: white; margin-left: 10px;">
       <i class="fa-solid fa-trash-can"></i> ゴミ画像をお掃除
     </button>
@@ -286,6 +289,31 @@ $('#post-list').on('click', '.delete-btn', async function() {
     loadPosts();
     updatePreview();
 });
+
+$('#generate-btn').on('click', async function() {
+        if (!confirm('記事ページを再生成して、サイトを更新しますか？')) return;
+
+        const $btn = $(this);
+        const originalText = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 更新中...');
+
+        try {
+            const response = await fetch('http://localhost:3000/api/generate', { method: 'POST' });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message);
+            } else {
+                alert('エラー: ' + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('通信エラーが発生しました。');
+        } finally {
+            $btn.prop('disabled', false).html(originalText);
+        }
+    });
+
 $('#cleanup-btn').on('click', async function() {
       if (!confirm('記事で使用されていない画像をすべて削除します。\n本当によろしいですか？')) return;
 

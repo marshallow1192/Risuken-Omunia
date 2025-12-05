@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <title>記事編集ページ</title>
-    <link rel="stylesheet" href="style.css">
 <link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../docs/style.css">
   <link rel="apple-touch-icon" href="img/favicon.png">
 <meta name="google-site-verification" content="FopI5soj9MaN8IgVC_4FoFFB4G7aFBI3CIDFDqXmuvY" />
     <style>
@@ -61,6 +61,9 @@
 <body>
   <div class="editor-container">
     <h1>記事編集フォーム</h1>
+    <button id="generate-btn" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      <i class="fa-solid fa-rotate"></i> サイトを更新して公開する
+    </button>
     <form id="edit-form">
       <label>タイトル:40文字以内</label>
       <input type="text" id="title" name="title" maxlength="40" required>

@@ -8,6 +8,8 @@ const crypto = require('crypto'); // ← これを追加（インストール不
 const app = express();
 const port = 3000;
 
+const { exec } = require('child_process');
+
 app.use(cors());
 // JSONデータとURLエンコードされたデータを受け取る設定
 app.use(express.json());
@@ -305,6 +307,27 @@ app.delete('/api/images/cleanup', (req, res) => {
     console.error('お掃除中にエラー:', error);
     res.status(500).json({ message: '画像のお掃除に失敗しました。' });
   }
+});
+
+// ▼▼▼ サイト生成（更新）用API ▼▼▼
+app.post('/api/generate', (req, res) => {
+  console.log('サイト再生成のリクエストを受け付けました...');
+
+  // server.js の一つ上の階層にある generateArticle.js を指定
+  const scriptPath = path.join(__dirname, '../generateArticle.js');
+
+  // コマンド実行 (node generateArticle.js)
+  exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`実行エラー: ${error}`);
+      return res.status(500).json({ message: 'サイト生成に失敗しました。ログを確認してください。' });
+    }
+
+    console.log(`stdout: ${stdout}`);
+    if (stderr) console.error(`stderr: ${stderr}`);
+
+    res.status(200).json({ message: 'サイトの更新（HTML生成）が完了しました！' });
+  });
 });
 
 // サーバーを起動
