@@ -70,6 +70,9 @@
 <div class="editor-container">
   <div class="form-area">
     <h1>お知らせ投稿フォーム</h1>
+    <button id="cleanup-btn" class="admin-button" style="background-color: #6c757d; color: white; margin-left: 10px;">
+      <i class="fa-solid fa-trash-can"></i> ゴミ画像をお掃除
+    </button>
     <form id="post-form" onsubmit="return false;">
       <label>タイトル:40文字以内</label>
       <input type="text" id="title" name="title" maxlength="40" required>
@@ -191,7 +194,7 @@ $('#post-list').on('click', '.delete-btn', async function() {
             const d = new Date(date);
             displayDate = `公開日 : ${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
         }
-        
+
         $('#preview-title').text(title || 'タイトルがここに表示されます');
         $('#preview-date').text(displayDate);
         $('#preview-content').html(marked.parse(contentMd || ''));
@@ -214,7 +217,7 @@ $('#post-list').on('click', '.delete-btn', async function() {
         const date = new Date(formData.get('date'));
         const displayDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
         formData.append('displayDate', displayDate);
-        
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -283,6 +286,24 @@ $('#post-list').on('click', '.delete-btn', async function() {
     loadPosts();
     updatePreview();
 });
+$('#cleanup-btn').on('click', async function() {
+      if (!confirm('記事で使用されていない画像をすべて削除します。\n本当によろしいですか？')) return;
+
+      const $btn = $(this);
+      const originalText = $btn.html();
+      $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 処理中...');
+
+      try {
+        const response = await fetch('http://localhost:3000/api/images/cleanup', { method: 'DELETE' });
+        const result = await response.json();
+        alert(result.message);
+      } catch (error) {
+        console.error(error);
+        alert('エラーが発生しました。');
+      } finally {
+        $btn.prop('disabled', false).html(originalText);
+      }
+    });
     </script>
   </body>
 </html>

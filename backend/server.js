@@ -45,7 +45,10 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
   }
 
   const newFilePath = req.file.path; // 今保存されたファイルのパス
+  console.log("hello world!!!!!!")
+  console.log(newFilePath)
   const imgDir = path.dirname(newFilePath); // 保存先フォルダ (docs/img)
+  console.log(imgDir)
 
   try {
     // 1. 今アップロードされたファイルの「指紋（ハッシュ）」と「サイズ」を取得
@@ -60,7 +63,6 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
       if (file === req.file.filename) continue;
 
       const existingFilePath = path.join(imgDir, file);
-      
       // フォルダかファイルか確認（念のため）
       const stats = fs.statSync(existingFilePath);
       if (!stats.isFile()) continue;
@@ -188,7 +190,7 @@ app.put('/api/posts/:id', upload.single('image'), (req, res) => {
     const updatedPost = {
       ...allPosts[postIndex], // 既存のデータをコピー
       ...req.body, // 新しいテキストデータで上書き
-      image: req.file ? `/uploads/${req.file.filename}` : allPosts[postIndex].image // 画像が更新されていればパスを更新
+      image: req.file ? `img/articleimg/${req.file.filename}` : allPosts[postIndex].image // 画像が更新されていればパスを更新
     };
     // 配列の該当箇所を新しいデータに差し替え
     allPosts[postIndex] = updatedPost;
@@ -240,49 +242,53 @@ app.delete('/api/posts/:id', (req, res) => {
     res.status(500).json({ message: 'サーバーエラー' });
   }
 });
+// ▼▼▼ server.js の /api/images/cleanup 部分 ▼▼▼
 
-// ▼▼▼ 未使用画像の削除（お掃除）API ▼▼▼
+// ▼▼▼ 未使用画像の削除（articleimgフォルダ限定版） ▼▼▼
 app.delete('/api/images/cleanup', (req, res) => {
-  const imgDir = path.join(__dirname, '../docs/img');
+  // ターゲットを 'docs/img/articleimg' に限定！
+  const imgDir = path.join(__dirname, '../docs/img/articleimg');
   const dataPath = path.join(__dirname, '../docs/info.json');
 
-  // 1. 絶対に消したくないファイル（faviconなど）
-  const keepFiles = ['favicon.png', 'activity-default.jpg', '.gitkeep'];
-
   try {
-    // フォルダ内の全ファイルを取得
+    // フォルダが存在しない場合のガード
+    if (!fs.existsSync(imgDir)) {
+      return res.json({ message: 'まだ記事用の画像フォルダ(articleimg)がありません。' });
+    }
+
+    // 1. articleimgフォルダ内の全ファイルを取得
     const allFiles = fs.readdirSync(imgDir);
-    
-    // info.json から「使用中の画像」を洗い出す
+
+    // 2. 記事データを見て「使われている画像」のファイル名リストを作る
     const posts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    const usedImages = new Set(keepFiles); // 消さないファイルもセットに追加
+    const usedImages = new Set();
 
     posts.forEach(post => {
-      // (A) サムネイル画像 (post.img)
+      // (A) サムネイル画像 (例: "img/articleimg/photo.jpg")
       if (post.img) {
-        // "img/filename.jpg" から "filename.jpg" だけ取り出す
-        const filename = path.basename(post.img);
-        usedImages.add(filename);
+        // パスがどうなっていても、ファイル名(photo.jpg)だけを取り出して登録
+        usedImages.add(path.basename(post.img));
       }
-      
-      // (B) 本文内の画像 (Markdown: ![alt](img/xxx.jpg))
+
+      // (B) 本文内の画像
       if (post.contentMd) {
-        // 正規表現で "img/..." を探し出す
-        const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.]+/g);
+        // 本文中の "img/..." っぽい文字列を全部探す
+        const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.\/]+/g);
         if (matches) {
           matches.forEach(match => {
-             const filename = path.basename(match);
-             usedImages.add(filename);
+             // これもファイル名だけを取り出して登録
+            usedImages.add(path.basename(match));
           });
         }
       }
     });
 
-    // 削除処理実行
+    // 3. 削除実行
     let deletedCount = 0;
     allFiles.forEach(file => {
-      // ファイルかどうか確認（フォルダは無視）
       const filePath = path.join(imgDir, file);
+
+      // 念のためファイル以外（フォルダなど）は無視
       if (!fs.statSync(filePath).isFile()) return;
 
       // 「使われているリスト」になければ削除！
@@ -293,7 +299,7 @@ app.delete('/api/images/cleanup', (req, res) => {
       }
     });
 
-    res.json({ message: `${deletedCount} 個の未使用画像を削除しました！` });
+    res.json({ message: `articleimgフォルダから ${deletedCount} 個のゴミ画像を削除しました！` });
 
   } catch (error) {
     console.error('お掃除中にエラー:', error);
