@@ -97,7 +97,15 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
 // ▼▼▼ POSTリクエストのルートを修正 ▼▼▼
 // upload.single('image') ミドルウェアを追加
 app.post('/api/posts', upload.single('image'), (req, res) => {
-  console.log('受け取ったテキストデータ:', req.body);
+  // let tempbody = req.body
+  // const article = tempbody.replace("![画像の説明](docs/img/articleimg/","![画像の説明](img/articleimg/")
+  // let tempbody = req.body
+  if (req.body.contentMd) {
+    // "docs/img/" という文字があったら、全部 "img/" に書き換える
+    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, 'img/');
+  }
+
+  console.log('受け取ったテキストデータ:',req.body);
   console.log('受け取ったファイル:', req.file);
 
   // 1. 新しい投稿データをテキスト部分から取得
@@ -105,7 +113,7 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 
   // 2. アップロードされた画像のパスを追加
   if (req.file) {
-    newPost.img = `img/${req.file.filename}`;
+    newPost.img = `img/articleimg/${req.file.filename}`;
   } else {
     newPost.img = 'img/activity-default.jpg'; // 画像がない場合のデフォルト
   }
@@ -203,12 +211,12 @@ app.delete('/api/posts/:id', (req, res) => {
 
     // 1. 削除対象の記事を見つけて、ファイル名（link）を取得する
     const postToDelete = allPosts.find(p => p.idNum == req.params.id);
-    
+
     // もし削除対象が見つからなければ、エラーを返す
     if (!postToDelete) {
       return res.status(404).json({ message: '削除対象の記事が見つかりません。' });
     }
-    const htmlFilePath = path.join(__dirname, '..', postToDelete.link);
+    const htmlFilePath = path.join(__dirname, '../docs/', postToDelete.link);
 
     // 2. 記事リストから対象の記事を除外する (既存のロジック)
     const updatedPosts = allPosts.filter(p => p.idNum != req.params.id);
@@ -222,7 +230,7 @@ app.delete('/api/posts/:id', (req, res) => {
     } else {
       console.log(`${htmlFilePath} は見つかりませんでしたが、JSONデータは削除されました。`);
     }
-    
+
     // ▲▲▲ ここまでが変更点 ▲▲▲
 
     res.status(200).json({ message: '記事データとHTMLファイルを削除しました。' });
