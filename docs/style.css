@@ -374,7 +374,7 @@ body{
   background-color: #ffffff;
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.5rem, 1rem + 3vw, 2.5rem);
+  font-size: clamp(1.3rem, 0.8rem + 3vw, 2.3rem);
   background: linear-gradient(transparent 50%, #8eff9f 50%);
   letter-spacing: 0.05em;
 }
