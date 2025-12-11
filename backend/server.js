@@ -4,7 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const multer = require('multer'); // multerを読み込む
 const crypto = require('crypto'); // ← これを追加（インストール不要、標準機能です）
-
+const sharp = require('sharp');
 const app = express();
 const port = 3000;
 
@@ -41,10 +41,12 @@ const upload = multer({ storage: storage });
 app.use('/img', express.static(path.join(__dirname, '../docs/img')));
 
 // ▼▼▼ 【修正版】画像アップロード用API（重複チェック機能付き） ▼▼▼
-app.post('/api/upload-image', upload.single('image'), (req, res) => {
+app.post('/api/upload-image', upload.single('image'), async(req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'ファイルがありません' });
   }
+
+  await optimizeImage(req.file.path);
 
   const newFilePath = req.file.path; // 今保存されたファイルのパス
   console.log("hello world!!!!!!")
@@ -98,12 +100,30 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
   }
 });
 
+const optimizeImage = async (filePath) => {
+  try {
+    // 1. ファイルを一旦読み込む
+    const imageBuffer = fs.readFileSync(filePath);
+
+    // 2. Sharpで加工する
+    const processedBuffer = await sharp(imageBuffer)
+      .rotate() // スマホで撮った写真の「向き」を自動補正（これ大事！）
+      .resize({ width: 1200, withoutEnlargement: true }) // 横幅1200pxに縮小（元がそれ以下ならそのまま）
+      .jpeg({ quality: 80, mozjpeg: true }) // 画質80%のJPEGに変換
+      .toBuffer();
+
+    // 3. 元のファイルに上書き保存
+    fs.writeFileSync(filePath, processedBuffer);
+
+    console.log(`画像を圧縮しました！: ${filePath}`);
+  } catch (error) {
+    console.error('画像圧縮に失敗しました（元のまま保存されます）:', error);
+  }
+};
+
 // ▼▼▼ POSTリクエストのルートを修正 ▼▼▼
 // upload.single('image') ミドルウェアを追加
-app.post('/api/posts', upload.single('image'), (req, res) => {
-  // let tempbody = req.body
-  // const article = tempbody.replace("![画像の説明](docs/img/articleimg/","![画像の説明](img/articleimg/")
-  // let tempbody = req.body
+app.post('/api/posts', upload.single('image'), async(req, res) => {
   if (req.body.contentMd) {
     // "docs/img/" という文字があったら、全部 "img/" に書き換える
     req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, 'img/');
@@ -117,6 +137,7 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
 
   // 2. アップロードされた画像のパスを追加
   if (req.file) {
+    await optimizeImage(req.file.path);
     newPost.img = `img/articleimg/${req.file.filename}`;
   } else {
     newPost.img = 'img/activity-default.jpg'; // 画像がない場合のデフォルト
@@ -178,7 +199,7 @@ app.get('/api/posts/:id', (req, res) => {
   }
 });
 
-app.put('/api/posts/:id', upload.single('image'), (req, res) => {
+app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
   const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
@@ -186,6 +207,10 @@ app.put('/api/posts/:id', upload.single('image'), (req, res) => {
 
     if (postIndex === -1) {
       return res.status(404).json({ message: '更新対象の記事が見つかりません。' });
+    }
+
+    if (req.file) {
+    await optimizeImage(req.file.path);
     }
 
     // 既存のデータを取得し、新しいデータで上書き

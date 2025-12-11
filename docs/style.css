@@ -608,10 +608,36 @@ hr {
   }
 }
 /* 記事エリア内のすべての画像に対するルール */
-.reportContents img {
-  max-width: 100%;  /* 幅は親要素（記事の幅）に合わせる、それ以上大きくならない */
-  height: auto;     /* 高さは幅に合わせて自動調整（縦横比を崩さない） */
-  object-fit: contain; /* 画像全体が収まるように表示 */
+/* ▼▼▼ 記事内の画像を「いい感じ」にする設定 ▼▼▼ */
+.reportContents img,
+.contents img,
+.markdown-body img {
+  /* 1. 基本のサイズ設定 */
+  max-width: 100%;       /* スマホなどで画面からはみ出さないようにする */
+  width: auto;           /* ★重要：無理に引き伸ばさず、元の比率を保つ */
+
+  /* 2. PCでデカくなりすぎないように制限 */
+  max-height: 600px;     /* 縦長すぎてスクロールが大変になるのを防ぐ */
+
+  /* 3. 画像を真ん中に配置 */
+  display: block;        /* ブロック要素にする（margin: autoを効かせるため） */
+  margin: 20px auto;     /* 上下20pxあけて、左右は自動（真ん中寄せ） */
+
+  /* 4. 「写真感」を出して画質をごまかすテクニック */
+  border-radius: 8px;              /* 角を少し丸くする */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* ふんわり影をつける */
+  object-fit: contain;   /* 比率を崩さない */
+}
+
+/* ▼▼▼ スマホの時だけ、もう少し大きく見せたい場合 ▼▼▼ */
+@media screen and (max-width: 768px) {
+  .reportContents img, 
+  .contents img, 
+  .markdown-body img {
+    width: 100%;        /* スマホなら横幅いっぱいでOK */
+    border-radius: 4px; /* スマホなら角丸は控えめに */
+    margin: 15px 0;     /* 上下の余白も少し狭く */
+  }
 }
 .br-sp {
   display: inline;
