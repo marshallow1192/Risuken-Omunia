@@ -126,7 +126,7 @@ const optimizeImage = async (filePath) => {
 app.post('/api/posts', upload.single('image'), async(req, res) => {
   if (req.body.contentMd) {
     // "docs/img/" という文字があったら、全部 "img/" に書き換える
-    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, 'img/');
+    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
   }
 
   console.log('受け取ったテキストデータ:',req.body);
@@ -138,9 +138,9 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
   // 2. アップロードされた画像のパスを追加
   if (req.file) {
     await optimizeImage(req.file.path);
-    newPost.img = `img/articleimg/${req.file.filename}`;
+    newPost.img = `../img/articleimg/${req.file.filename}`;
   } else {
-    newPost.img = 'img/activity-default.jpg'; // 画像がない場合のデフォルト
+    newPost.img = '../img/activity-default.jpg'; // 画像がない場合のデフォルト
   }
 
   const dataPath = path.join(__dirname, '..', 'docs/info.json');
@@ -152,7 +152,7 @@ const aryMax = function (a, b) {return Math.max(a, b);}
     let idNumList = currentData.map(item => item.idNum);
     const idNum = idNumList.reduce(aryMax)+1;
     newPost.idNum = idNum;
-    newPost.link = `report${idNum}.html`;
+    newPost.link = `articles/article${idNum}.html`;
     currentData.unshift(newPost); // 新しい投稿を配列の先頭に追加
     const newJsonData = JSON.stringify(currentData, null, 2);
     fs.writeFileSync(dataPath, newJsonData, 'utf8');
@@ -217,7 +217,7 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
     const updatedPost = {
       ...allPosts[postIndex], // 既存のデータをコピー
       ...req.body, // 新しいテキストデータで上書き
-      image: req.file ? `img/articleimg/${req.file.filename}` : allPosts[postIndex].image // 画像が更新されていればパスを更新
+      image: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].image // 画像が更新されていればパスを更新
     };
     // 配列の該当箇所を新しいデータに差し替え
     allPosts[postIndex] = updatedPost;
