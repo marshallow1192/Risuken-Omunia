@@ -48,6 +48,29 @@
         <div class="contents">
           <%- contentHtml %>
         </div>
+        <div class="article-navigation">
+        <% if (nextPost) { %>
+        <a href="<%= nextPost.link %>" class="nav-btn next">
+          <span class="nav-arrow"><i class="fa-solid fa-chevron-left"></i> 次の記事</span>
+          <span class="nav-title"><%= nextPost.title %></span>
+        </a>
+      <% } else { %>
+        <div class="nav-placeholder"></div>
+      <% } %>
+
+      <a href="../information.html" class="nav-btn list">
+        <i class="fa-solid fa-list"></i> 一覧
+      </a>
+
+      <% if (prevPost) { %>
+        <a href="<%= prevPost.link %>" class="nav-btn prev">
+          <span class="nav-arrow">前の記事 <i class="fa-solid fa-chevron-right"></i></span>
+          <span class="nav-title"><%= prevPost.title %></span>
+        </a>
+      <% } else { %>
+        <div class="nav-placeholder"></div>
+      <% } %>
+    </div>
       </article>
     </main>
 

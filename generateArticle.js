@@ -1,7 +1,8 @@
 // 必要なライブラリを読み込む
 const fs = require('fs');
 const ejs = require('ejs');
-const { marked } = require('marked'); // ← markedを読み込む
+const path = require('path')
+const { marked } = require('marked');
 
 console.log('HTMLファイルの生成を開始します...');
 
@@ -12,25 +13,49 @@ const data = JSON.parse(fs.readFileSync('../docs/info.json', 'utf8'));
 const template = fs.readFileSync('../articleTemplate.ejs', 'utf8');
 
 // 3. データをもとにループ処理でHTMLファイルを一枚ずつ生成
-data.forEach(item => {
-  // ▼▼▼ ここからが変更点 ▼▼▼
+// ★変更点1：index（何番目の記事か）も受け取るように変更
+data.forEach((item, index) => {
+  
+  // ▼▼▼ ナビゲーション用の計算（追加部分） ▼▼▼
+  // 記事は新しい順に並んでいる前提です
+  
+// 1. 前後の記事データを取得
+  const nextPostOriginal = index > 0 ? data[index - 1] : null;
+  const prevPostOriginal = index < data.length - 1 ? data[index + 1] : null;
+
+  // 2. テンプレート用にデータを加工（ここがポイント！）
+  // そのままだと "articles/article9.html" になってしまうので、
+  // path.basename() を使って "article9.html" (ファイル名だけ) に変換する
+
+  let nextPost = null;
+  if (nextPostOriginal) {
+    nextPost = { ...nextPostOriginal }; // データをコピー
+    nextPost.link = path.basename(nextPostOriginal.link); // ★ここで "articles/" を消す！
+  }
+
+  let prevPost = null;
+  if (prevPostOriginal) {
+    prevPost = { ...prevPostOriginal }; // データをコピー
+    prevPost.link = path.basename(prevPostOriginal.link); // ★ここでも "articles/" を消す！
+  }
 
   // 4. Markdown形式の本文をHTMLに変換する
-  const contentHtml = marked.parse(item.contentMd);
+  // (contentMdがない場合にエラーにならないよう || '' を追加)
+  const contentHtml = marked.parse(item.contentMd || '');
   
-  // 5. 元のデータに、変換後のHTMLを追加した新しいオブジェクトを作成
+  // 5. テンプレートに渡すデータをまとめる
   const renderData = {
-    ...item, // 元のデータ（title, dateなど）をすべてコピー
-    contentHtml: contentHtml // 変換したHTMLを追加
+    ...item,        // 記事データ本体 (template内では post.title などで使う)
+    contentHtml: contentHtml, // 変換済みの本文 (template内では content で使う)
+    nextPost: nextPost,   // 次の記事データ (なければnull)
+    prevPost: prevPost    // 前の記事データ (なければnull)
   };
-
-  // ▲▲▲ ここまでが変更点 ▲▲▲
   
   // EJSを使ってテンプレートにデータを流し込む
   const renderedHtml = ejs.render(template, renderData);
   
   // 出力するファイルパスを指定
-  const outputFilePath = "../docs/"+item.link;
+  const outputFilePath = "../docs/" + item.link;
   
   // HTMLファイルとして書き出す
   fs.writeFileSync(outputFilePath, renderedHtml, 'utf8');
@@ -40,9 +65,10 @@ data.forEach(item => {
 
 console.log('HTMLファイルの生成が完了しました！');
 
-// ▼▼▼ 既存のコードの下に追加（サイトマップ生成機能） ▼▼▼
 
-// サイトのドメイン（自分のURLに書き換えてください）
+// ▼▼▼ サイトマップ生成機能（そのまま維持） ▼▼▼
+
+// サイトのドメイン
 const SITE_URL = 'https://risuken-omunia.com';
 
 // 固定ページ（記事以外のページ）のリスト
@@ -68,7 +94,7 @@ staticPages.forEach(page => {
   </url>`;
 });
 
-// 2. 記事ページを追加（dataは上で読み込んだjsonデータ）
+// 2. 記事ページを追加
 data.forEach(item => {
   sitemapContent += `
   <url>

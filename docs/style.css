@@ -779,3 +779,129 @@ hr {
   background: #999; /* グレー */
   color: #fff;
 }
+
+/* ▼▼▼ 記事下ナビゲーション（HTML構造対応版） ▼▼▼ */
+
+/* 1. 外枠：横並びレイアウト */
+.article-navigation {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid #eee; /* 上に区切り線 */
+  display: flex;
+  justify-content: space-between; /* 両端と中央に配置 */
+  align-items: stretch; /* 高さを揃える */
+  gap: 15px; /* ボタン間の隙間 */
+}
+
+/* 2. ボタン共通のデザイン */
+.nav-btn {
+  display: flex;
+  flex-direction: column; /* 中身を縦並び（ラベル＋タイトル） */
+  justify-content: center;
+  
+  flex: 1; /* 幅を均等に広げる */
+  max-width: 45%; /* 広がりすぎないように制限 */
+  
+  text-decoration: none;
+  background-color: #f9f9f9; /* 背景色：薄いグレー */
+  border-radius: 8px; /* 角丸 */
+  padding: 15px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+/* ホバー時の動き */
+.nav-btn:hover {
+  background-color: #eef; /* 薄い青っぽく変化 */
+  transform: translateY(-2px); /* 少し浮く */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 3. 左側：「次の記事」ボタン（next） */
+/* HTML上で最初に書かれているので左に来ます */
+.nav-btn.next {
+  text-align: left;       /* 文字を左寄せ */
+  align-items: flex-start; /* フレックス要素も左寄せ */
+}
+
+/* 4. 右側：「前の記事」ボタン（prev） */
+/* HTML上で最後に書かれているので右に来ます */
+.nav-btn.prev {
+  text-align: right;      /* 文字を右寄せ */
+  align-items: flex-end;   /* フレックス要素も右寄せ */
+}
+
+/* 5. 真ん中：「一覧」ボタン（list） */
+.nav-btn.list {
+  flex: 0 0 auto; /* 幅を広げない */
+  width: auto;
+  min-width: 80px;
+  
+  background: transparent; /* 背景なし */
+  border: 1px solid #ddd;
+  align-items: center; /* 上下左右中央 */
+}
+
+.nav-btn.list:hover {
+  background-color: #17a2b8; /* テーマカラー */
+  color: white;
+  border-color: #17a2b8;
+}
+
+/* 6. ボタン内の文字装飾 */
+.nav-arrow {
+  font-size: 12px;
+  color: #17a2b8; /* テーマカラー（水色） */
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.nav-title {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.4;
+  
+  /* 長いタイトルを2行で省略する設定 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 7. 記事がない場合のスペース確保用（レイアウト崩れ防止） */
+.nav-placeholder {
+  flex: 1;
+  max-width: 45%;
+}
+
+/* 8. スマホ対応（画面幅600px以下） */
+@media (max-width: 600px) {
+  .article-navigation {
+    flex-direction: column; /* 縦並びにする */
+    gap: 10px;
+  }
+  
+  .nav-btn {
+    max-width: 100%;
+    width: 100%;
+    align-items: center; /* スマホでは全部中央寄せが見やすいかも */
+    text-align: center;
+  }
+  
+  /* 具体的な指定（スマホでも左右のニュアンスを残したい場合） */
+  .nav-btn.next { align-items: flex-start; text-align: left; }
+  .nav-btn.prev { align-items: flex-end; text-align: right; }
+
+  /* 一覧ボタンを一番下に持っていく */
+  .nav-btn.list {
+    order: 3;
+    width: 100%;
+    padding: 10px;
+  }
+  
+  /* プレースホルダー（空箱）はスマホでは消す（無駄な余白になるため） */
+  .nav-placeholder {
+    display: none;
+  }
+}
