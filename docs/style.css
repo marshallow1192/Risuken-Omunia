@@ -861,7 +861,6 @@ hr {
   font-size: 14px;
   font-weight: bold;
   line-height: 1.4;
-  
   /* 長いタイトルを2行で省略する設定 */
   display: -webkit-box;
   -webkit-line-clamp: 2;

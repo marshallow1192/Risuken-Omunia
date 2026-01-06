@@ -200,6 +200,10 @@ app.get('/api/posts/:id', (req, res) => {
 });
 
 app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
+    if (req.body.contentMd) {
+    // "docs/img/" という文字があったら、全部 "img/" に書き換える
+    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+  }
   const dataPath = path.join(__dirname, '..', 'docs/info.json');
   try {
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
