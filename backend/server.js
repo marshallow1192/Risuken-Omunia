@@ -85,18 +85,18 @@ app.post('/api/upload-image', upload.single('image'), async(req, res) => {
         fs.unlinkSync(newFilePath);
 
         // 4. 代わりに「昔からあるファイル」のパスを返す
-        return res.json({ url: 'docs/img/articleimg/' + file });
+        return res.json({ url: 'docs/img/articleimg/' + file.replace(/\s+/g,"") });
       }
     }
 
     // 重複がなければ、そのまま新しいファイルのパスを返す
-    const imagePath = 'docs/img/articleimg/' + req.file.filename;
+    const imagePath = 'docs/img/articleimg/' + req.file.filename.replace(/\s+/g,"");
     res.json({ url: imagePath });
 
   } catch (error) {
     console.error('重複チェック中にエラー:', error);
     // エラーが出てもとりあえずアップロードは成功にしておく（安全策）
-    res.json({ url: 'docs/img/articleimg/' + req.file.filename });
+    res.json({ url: 'docs/img/articleimg/' + req.file.filename.replace(/\s+/g,"") });
   }
 });
 
@@ -113,7 +113,7 @@ const optimizeImage = async (filePath) => {
       .toBuffer();
 
     // 3. 元のファイルに上書き保存
-    fs.writeFileSync(filePath, processedBuffer);
+    fs.writeFileSync(filePath.replace(/\s+/g,""), processedBuffer);
 
     console.log(`画像を圧縮しました！: ${filePath}`);
   } catch (error) {
@@ -138,7 +138,7 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
   // 2. アップロードされた画像のパスを追加
   if (req.file) {
     await optimizeImage(req.file.path);
-    newPost.img = `../img/articleimg/${req.file.filename}`;
+    newPost.img = `../img/articleimg/${req.file.filename.replace(/\s+/g,"")}`;
   } else {
     newPost.img = '../img/activity-default.jpg'; // 画像がない場合のデフォルト
   }
@@ -221,7 +221,7 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
     const updatedPost = {
       ...allPosts[postIndex], // 既存のデータをコピー
       ...req.body, // 新しいテキストデータで上書き
-      image: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].image // 画像が更新されていればパスを更新
+      img: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].img // 画像が更新されていればパスを更新
     };
     // 配列の該当箇所を新しいデータに差し替え
     allPosts[postIndex] = updatedPost;

@@ -300,6 +300,7 @@ body{
 /* --- カードリストのレイアウト --- */
 .card-list {
   display: grid;
+  margin-top: 20px;
   /* 画面幅に応じてカードの列数を自動調整（1列の最小幅は300px） */
   grid-template-columns: 1fr;
   gap: 24px; /* カード間の余白 */
