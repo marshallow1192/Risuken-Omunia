@@ -75,9 +75,11 @@
     $(async function() {
         const API_URL = 'http://localhost:3000/api/posts';
 
-        // 1. URLから編集したい記事のIDを取得
+        // 1. URLから編集したい記事のIDとカテゴリを取得
         const params = new URLSearchParams(window.location.search);
         const postId = params.get('id');
+        // カテゴリが指定されていなければ 'info' (お知らせ) とみなす
+        const category = params.get('cat') || 'info'; 
 
         if (!postId) {
             alert('編集する記事のIDが指定されていません。');
@@ -85,7 +87,9 @@
             return;
         }
 
-        // --- プレビュー更新機能 ---
+        console.log(`編集モード: ID=${postId}, カテゴリ=${category}`);
+
+        // --- プレビュー更新機能（ここは変更なし） ---
         function updatePreview() {
             const title = $('#title').val();
             const date = $('#date').val();
@@ -106,15 +110,13 @@
                 const reader = new FileReader();
                 reader.onload = e => $('#preview-image').attr('src', e.target.result).show();
                 reader.readAsDataURL(imageInput.files[0]);
-            } else {
-                // 新しい画像が選択されていなければ、既存の画像（ロード時にセットされたもの）があればそれを維持
-                // 何もしなくてOK（src属性が残っているため）
             }
         }
 
         // --- 既存データの取得とフォームへのセット ---
         try {
-            const response = await fetch(`${API_URL}/${postId}`);
+            // ★変更点：カテゴリを指定してデータを取得
+            const response = await fetch(`${API_URL}/${postId}?cat=${category}`);
             if (!response.ok) throw new Error('記事データの取得に失敗しました。');
 
             const postData = await response.json();
@@ -122,21 +124,22 @@
             $('#title').val(postData.title);
             $('#date').val(postData.date);
 
-            // ★修正ポイント1：本文中のパスを修正してセット
-            // "docs/img/" が含まれていたら "img/" に置換して、プレビューで表示できるようにする
-            const fixedContent = postData.contentMd ? postData.contentMd.replace("![画像の説明](../img/", '![画像の説明](docs/img/') : '';
+            // 本文のパス修正
+            let fixedContent = postData.contentMd || '';
+            fixedContent = fixedContent.replace(/docs\/img\//g, 'img/');
+            fixedContent = fixedContent.replace(/\.\.\/img\//g, 'img/'); // ../img/ も img/ に戻す
             $('#contentMd').val(fixedContent);
 
-            // 既存のサムネイル画像があれば表示
+            // 既存画像の表示
             const currentImgPath = postData.img || postData.image;
             if (currentImgPath) {
-                // パスの調整（docs/始まりだったら削るなど）
-                // ここでは単純にサーバーのルートからのパスとして扱います
                 let displayImgPath = currentImgPath;
-                if (displayImgPath.startsWith('docs/')) {
+                if (displayImgPath.startsWith('../')) {
+                    displayImgPath = displayImgPath.replace('../', ''); // ../img -> img
+                } else if (displayImgPath.startsWith('docs/')) {
                     displayImgPath = displayImgPath.replace('docs/', '');
                 }
-
+                
                 const fullPath = `http://localhost:3000/${displayImgPath}`;
                 $('#current-image').attr('src', fullPath).show();
                 $('#preview-image').attr('src', fullPath).show();
@@ -152,7 +155,7 @@
         // --- イベントリスナー ---
         $('#edit-form input, #edit-form textarea').on('input', updatePreview);
 
-        // ★修正ポイント2：本文への画像挿入機能（admin.htmlと統一）
+        // 本文への画像挿入機能
         $('#body-image-upload').on('change', async function() {
             const file = this.files[0];
             if (!file) return;
@@ -165,46 +168,38 @@
                     method: 'POST',
                     body: formData
                 });
-
                 if (!response.ok) throw new Error('アップロード失敗');
-
                 const result = await response.json();
-                const imageUrl = result.url;
-
-                // カーソル位置にMarkdownを挿入
+                
+                // 編集画面では img/... として挿入（保存時に ../img/... に変換される）
+                let imageUrl = result.url.replace('docs/', ''); 
+                
                 const $textarea = $('#contentMd');
                 const textarea = $textarea[0];
                 const cursorPos = textarea.selectionStart;
                 const textBefore = textarea.value.substring(0, cursorPos);
                 const textAfter = textarea.value.substring(cursorPos);
-
                 const insertText = `\n![画像の説明](${imageUrl})\n`;
-
+                
                 textarea.value = textBefore + insertText + textAfter;
-
-                // プレビューを更新
                 updatePreview();
 
             } catch (error) {
                 console.error(error);
                 alert('画像のアップロードに失敗しました');
             }
-            // 同じファイルを連続で選べるようにリセット
             $(this).val('');
         });
 
-        // サイト生成（更新）ボタンの処理
+        // サイト生成ボタン
         $('#generate-btn').on('click', async function() {
             if (!confirm('記事ページを再生成して、サイトを更新しますか？')) return;
-
             const $btn = $(this);
             const originalText = $btn.html();
             $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 更新中...');
-
             try {
                 const response = await fetch('http://localhost:3000/api/generate', { method: 'POST' });
                 const result = await response.json();
-
                 if (response.ok) {
                     alert(result.message);
                 } else {
@@ -218,27 +213,31 @@
             }
         });
 
-        // フォーム送信（更新）の処理
+        // フォーム送信（更新処理）
         $('#edit-form').on('submit', async function(event) {
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
 
-            // 日付の表示用フォーマットを作成
+            // 日付フォーマット
             const dateVal = formData.get('date');
             const dateObj = new Date(dateVal);
             const displayDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
             formData.append('displayDate', displayDate);
+            
+            // ★変更点：カテゴリ情報も送信データに追加（念のため）
+            formData.append('category', category);
 
             try {
-                const response = await fetch(`${API_URL}/${postId}`, {
+                // ★変更点：更新リクエストのURLにも ?cat=... を付ける（これでサーバーが判断する）
+                const response = await fetch(`${API_URL}/${postId}?cat=${category}`, {
                     method: 'PUT',
                     body: formData,
                 });
                 const result = await response.json();
                 alert(result.message);
                 if (response.ok) {
-                    window.location.href = 'admin.html'; // 成功したら一覧に戻る
+                    window.location.href = 'admin.html';
                 }
             } catch (error) {
                 console.error('更新エラー:', error);

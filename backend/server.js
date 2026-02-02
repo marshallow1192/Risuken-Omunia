@@ -2,8 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
-const multer = require('multer'); // multerを読み込む
-const crypto = require('crypto'); // ← これを追加（インストール不要、標準機能です）
+const multer = require('multer');
+const crypto = require('crypto');
 const sharp = require('sharp');
 const app = express();
 const port = 3000;
@@ -11,7 +11,6 @@ const port = 3000;
 const { exec } = require('child_process');
 
 app.use(cors());
-// JSONデータとURLエンコードされたデータを受け取る設定
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,173 +21,109 @@ const getFileHash = (filePath) => {
   return hashSum.digest('hex');
 };
 
+// カテゴリに応じたファイルパス取得
+const getFilePath = (category) => {
+  return category === 'tech' ? '../docs/tech.json' : '../docs/info.json';
+};
+
 // ▼▼▼ multerの設定 ▼▼▼
 const storage = multer.diskStorage({
-  // ファイルの保存先を指定
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../docs/img/articleimg/')); // ルートのuploadsフォルダを指定
+    cb(null, path.join(__dirname, '../docs/img/articleimg/'));
   },
-  // ファイル名を指定 (ファイル名の重複を防ぐため、タイムスタンプを付与)
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
 const upload = multer({ storage: storage });
-// ▲▲▲ multerの設定 ▲▲▲
 
-// ▼▼▼ uploadsフォルダを静的ファイルとして配信する設定 ▼▼▼
-// これにより http://localhost:3000/uploads/画像ファイル名 でアクセスできる
 app.use('/img', express.static(path.join(__dirname, '../docs/img')));
 
-// ▼▼▼ 【修正版】画像アップロード用API（重複チェック機能付き） ▼▼▼
-app.post('/api/upload-image', upload.single('image'), async(req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'ファイルがありません' });
+// ▼▼▼ 画像最適化 ▼▼▼
+const optimizeImage = async (filePath) => {
+  try {
+    const imageBuffer = fs.readFileSync(filePath);
+    await sharp(imageBuffer)
+      .rotate()
+      .resize({ width: 1200, withoutEnlargement: true })
+      .jpeg({ quality: 80, mozjpeg: true })
+      .toBuffer()
+      .then(buffer => fs.writeFileSync(filePath.replace(/\s+/g,""), buffer));
+    console.log(`画像を圧縮しました: ${filePath}`);
+  } catch (error) {
+    console.error('画像圧縮失敗:', error);
   }
+};
+
+// ▼▼▼ 画像アップロードAPI ▼▼▼
+app.post('/api/upload-image', upload.single('image'), async(req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'ファイルがありません' });
 
   await optimizeImage(req.file.path);
-
-  const newFilePath = req.file.path; // 今保存されたファイルのパス
-  console.log("hello world!!!!!!")
-  console.log(newFilePath)
-  const imgDir = path.dirname(newFilePath); // 保存先フォルダ (docs/img)
-  console.log(imgDir)
+  const newFilePath = req.file.path;
+  const imgDir = path.dirname(newFilePath);
 
   try {
-    // 1. 今アップロードされたファイルの「指紋（ハッシュ）」と「サイズ」を取得
     const newFileHash = getFileHash(newFilePath);
     const newFileSize = req.file.size;
-
-    // 2. フォルダ内の他のファイルをチェック
     const files = fs.readdirSync(imgDir);
 
     for (const file of files) {
-      // 自分自身（今保存したファイル）はスキップ
       if (file === req.file.filename) continue;
-
       const existingFilePath = path.join(imgDir, file);
-      // フォルダかファイルか確認（念のため）
-      const stats = fs.statSync(existingFilePath);
-      if (!stats.isFile()) continue;
+      if (!fs.statSync(existingFilePath).isFile()) continue;
+      if (fs.statSync(existingFilePath).size !== newFileSize) continue;
 
-      // 【高速化】まずはファイルサイズが同じかチェック（サイズが違えば中身も絶対違うから）
-      if (stats.size !== newFileSize) continue;
-
-      // サイズが同じ場合だけ、中身（指紋）を計算して比較
-      const existingHash = getFileHash(existingFilePath);
-
-      if (newFileHash === existingHash) {
-        // ★★★ 重複発見！ ★★★
-        console.log(`重複画像が見つかりました: ${file} と同じです。新しいファイルを削除します。`);
-
-        // 3. 今アップロードしたファイルを削除（無かったことにする）
+      if (getFileHash(existingFilePath) === newFileHash) {
+        console.log(`重複画像を発見: ${file}`);
         fs.unlinkSync(newFilePath);
-
-        // 4. 代わりに「昔からあるファイル」のパスを返す
         return res.json({ url: 'docs/img/articleimg/' + file.replace(/\s+/g,"") });
       }
     }
-
-    // 重複がなければ、そのまま新しいファイルのパスを返す
     const imagePath = 'docs/img/articleimg/' + req.file.filename.replace(/\s+/g,"");
     res.json({ url: imagePath });
 
   } catch (error) {
-    console.error('重複チェック中にエラー:', error);
-    // エラーが出てもとりあえずアップロードは成功にしておく（安全策）
+    console.error('重複チェックエラー:', error);
     res.json({ url: 'docs/img/articleimg/' + req.file.filename.replace(/\s+/g,"") });
   }
 });
 
-const optimizeImage = async (filePath) => {
-  try {
-    // 1. ファイルを一旦読み込む
-    const imageBuffer = fs.readFileSync(filePath);
 
-    // 2. Sharpで加工する
-    const processedBuffer = await sharp(imageBuffer)
-      .rotate() // スマホで撮った写真の「向き」を自動補正（これ大事！）
-      .resize({ width: 1200, withoutEnlargement: true }) // 横幅1200pxに縮小（元がそれ以下ならそのまま）
-      .jpeg({ quality: 80, mozjpeg: true }) // 画質80%のJPEGに変換
-      .toBuffer();
+// ==================================================
+// ▼▼▼ 記事操作API ▼▼▼
+// ==================================================
 
-    // 3. 元のファイルに上書き保存
-    fs.writeFileSync(filePath.replace(/\s+/g,""), processedBuffer);
-
-    console.log(`画像を圧縮しました！: ${filePath}`);
-  } catch (error) {
-    console.error('画像圧縮に失敗しました（元のまま保存されます）:', error);
-  }
-};
-
-// ▼▼▼ POSTリクエストのルートを修正 ▼▼▼
-// upload.single('image') ミドルウェアを追加
-app.post('/api/posts', upload.single('image'), async(req, res) => {
-  if (req.body.contentMd) {
-    // "docs/img/" という文字があったら、全部 "img/" に書き換える
-    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
-  }
-
-  console.log('受け取ったテキストデータ:',req.body);
-  console.log('受け取ったファイル:', req.file);
-
-  // 1. 新しい投稿データをテキスト部分から取得
-  const newPost = req.body;
-
-  // 2. アップロードされた画像のパスを追加
-  if (req.file) {
-    await optimizeImage(req.file.path);
-    newPost.img = `../img/articleimg/${req.file.filename.replace(/\s+/g,"")}`;
-  } else {
-    newPost.img = '../img/activity-default.jpg'; // 画像がない場合のデフォルト
-  }
-
-  const dataPath = path.join(__dirname, '..', 'docs/info.json');
-
-const aryMax = function (a, b) {return Math.max(a, b);}
-
-  try {
-    const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    let idNumList = currentData.map(item => item.idNum);
-    const idNum = idNumList.reduce(aryMax)+1;
-    newPost.idNum = idNum;
-    newPost.link = `articles/article${idNum}.html`;
-    currentData.unshift(newPost); // 新しい投稿を配列の先頭に追加
-    const newJsonData = JSON.stringify(currentData, null, 2);
-    fs.writeFileSync(dataPath, newJsonData, 'utf8');
-
-    res.status(200).json({ message: '投稿が成功しました！' });
-  } catch (error) {
-    console.error('エラー:', error);
-    res.status(500).json({ message: 'サーバーでエラーが発生しました。' });
-  }
-});
-
+// 1. 記事一覧取得 (GET)
 app.get('/api/posts', (req, res) => {
-  const dataPath = path.join(__dirname, '../docs/info.json'); // パスも念のため修正
+  const category = req.query.cat || 'info';
+  const dataPath = path.join(__dirname, getFilePath(category));
+
   try {
+    if (!fs.existsSync(dataPath)) {
+      return res.json([]);
+    }
     const rawData = fs.readFileSync(dataPath, 'utf8');
-    const posts = JSON.parse(rawData); // ★先にJSON（配列）に変換する！
-
-    // 配列になってからソートする
+    const posts = JSON.parse(rawData);
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
     res.status(200).json(posts);
   } catch (error) {
-    console.error(error); // エラー内容をログに出すようにしておくと便利
-    res.status(500).json({ message: 'データの読み込みに失敗しました。' });
+    console.error(error);
+    res.status(500).json({ message: 'データ読み込みエラー' });
   }
 });
 
-// ...app.get('/api/posts', ...) の下に追加...
-
-// GETリクエストを '/api/posts/:id' というURLで受け付ける (一件取得用)
+// 2. 個別記事取得 (GET)
 app.get('/api/posts/:id', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'docs/info.json');
+  const category = req.query.cat || 'info';
+  const dataPath = path.join(__dirname, getFilePath(category));
+
   try {
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
+    
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    // URLの:idと一致する記事を探す
     const post = allPosts.find(p => p.idNum == req.params.id);
+
     if (post) {
       res.status(200).json(post);
     } else {
@@ -199,13 +134,79 @@ app.get('/api/posts/:id', (req, res) => {
   }
 });
 
-app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
-    if (req.body.contentMd) {
-    // "docs/img/" という文字があったら、全部 "img/" に書き換える
+// 3. 新規投稿 (POST) ★ここを修正しました★
+app.post('/api/posts', upload.single('image'), async(req, res) => {
+  console.log('受け取ったデータ:', req.body);
+  const category = req.body.category || 'info'; 
+  const dataPath = path.join(__dirname, getFilePath(category));
+
+  // ★修正1：データを先に読み込んで、最大IDを計算する
+  let currentData = [];
+  if (fs.existsSync(dataPath)) {
+    currentData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+  }
+
+  // 既存のIDの中から最大値を探す（なければ0）
+  // 念のため Number() で数値化してから比較します
+  const maxId = currentData.length > 0 
+    ? Math.max(...currentData.map(p => Number(p.idNum) || 0)) 
+    : 0;
+  
+  // 新しいIDは 最大値 + 1
+  const newId = maxId + 1;
+
+
+  // ★修正2：カテゴリに応じてファイル名を変える
+  // techなら "articles/tech1.html", infoなら "articles/article1.html"
+  const filenamePrefix = category === 'tech' ? 'tech' : 'article';
+  const newLink = `articles/${filenamePrefix}${newId}.html`;
+
+
+  // 本文のパス置換
+  if (req.body.contentMd) {
     req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
   }
-  const dataPath = path.join(__dirname, '..', 'docs/info.json');
+
+  // 新しい投稿データ作成
+  const newPost = req.body;
+  newPost.idNum = newId;  // 連番ID
+  newPost.link = newLink; // 新しい命名規則のリンク
+  newPost.category = category;
+
+  // 画像処理
+  if (req.file) {
+    await optimizeImage(req.file.path);
+    newPost.img = `../img/articleimg/${req.file.filename.replace(/\s+/g,"")}`;
+  } else {
+    newPost.img = ''; 
+  }
+
   try {
+    // 先頭に追加して保存
+    currentData.unshift(newPost);
+    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf8');
+
+    res.status(200).json({ message: `【${category}】記事(ID:${newId})を投稿しました！` });
+  } catch (error) {
+    console.error('投稿エラー:', error);
+    res.status(500).json({ message: '保存に失敗しました。' });
+  }
+});
+
+// 4. 記事更新 (PUT)
+app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
+  const category = req.body.category || 'info';
+  
+  if (req.body.contentMd) {
+    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+  }
+
+  const targetCategory = req.query.cat || req.body.category || 'info';
+  const dataPath = path.join(__dirname, getFilePath(targetCategory));
+
+  try {
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
+
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     const postIndex = allPosts.findIndex(p => p.idNum == req.params.id);
 
@@ -214,19 +215,19 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
     }
 
     if (req.file) {
-    await optimizeImage(req.file.path);
+      await optimizeImage(req.file.path);
     }
 
-    // 既存のデータを取得し、新しいデータで上書き
     const updatedPost = {
-      ...allPosts[postIndex], // 既存のデータをコピー
-      ...req.body, // 新しいテキストデータで上書き
-      img: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].img // 画像が更新されていればパスを更新
+      ...allPosts[postIndex],
+      ...req.body,
+      img: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].img,
+      category: targetCategory
     };
-    // 配列の該当箇所を新しいデータに差し替え
+    
     allPosts[postIndex] = updatedPost;
-
     fs.writeFileSync(dataPath, JSON.stringify(allPosts, null, 2), 'utf8');
+    
     res.status(200).json({ message: '記事を更新しました！' });
 
   } catch (error) {
@@ -235,131 +236,101 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
   }
 });
 
+// 5. 記事削除 (DELETE)
 app.delete('/api/posts/:id', (req, res) => {
-  const dataPath = path.join(__dirname, '..', 'docs/info.json');
+  const category = req.query.cat || 'info';
+  const dataPath = path.join(__dirname, getFilePath(category));
+
   try {
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
+
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-
-    // ▼▼▼ ここからが変更点 ▼▼▼
-
-    // 1. 削除対象の記事を見つけて、ファイル名（link）を取得する
     const postToDelete = allPosts.find(p => p.idNum == req.params.id);
 
-    // もし削除対象が見つからなければ、エラーを返す
     if (!postToDelete) {
-      return res.status(404).json({ message: '削除対象の記事が見つかりません。' });
+      return res.status(404).json({ message: '削除対象が見つかりません。' });
     }
-    const htmlFilePath = path.join(__dirname, '../docs/', postToDelete.link);
 
-    // 2. 記事リストから対象の記事を除外する (既存のロジック)
+    // HTMLファイルの削除
+    const htmlFilePath = path.join(__dirname, '../docs/', postToDelete.link);
+    if (fs.existsSync(htmlFilePath)) {
+      fs.unlinkSync(htmlFilePath);
+      console.log(`${htmlFilePath} を削除しました。`);
+    }
+
+    // JSONから削除
     const updatedPosts = allPosts.filter(p => p.idNum != req.params.id);
     fs.writeFileSync(dataPath, JSON.stringify(updatedPosts, null, 2), 'utf8');
 
-    // 3. 実際にHTMLファイルを削除する
-    //    fs.existsSync()でファイルが本当に存在するか念のため確認
-    if (fs.existsSync(htmlFilePath)) {
-      fs.unlinkSync(htmlFilePath); // ファイルを同期的に削除
-      console.log(`${htmlFilePath} を削除しました。`);
-    } else {
-      console.log(`${htmlFilePath} は見つかりませんでしたが、JSONデータは削除されました。`);
-    }
-
-    // ▲▲▲ ここまでが変更点 ▲▲▲
-
-    res.status(200).json({ message: '記事データとHTMLファイルを削除しました。' });
+    res.status(200).json({ message: '記事とHTMLを削除しました。' });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'サーバーエラー' });
   }
 });
-// ▼▼▼ server.js の /api/images/cleanup 部分 ▼▼▼
 
-// ▼▼▼ 未使用画像の削除（articleimgフォルダ限定版） ▼▼▼
+// お掃除・生成用API
 app.delete('/api/images/cleanup', (req, res) => {
-  // ターゲットを 'docs/img/articleimg' に限定！
   const imgDir = path.join(__dirname, '../docs/img/articleimg');
-  const dataPath = path.join(__dirname, '../docs/info.json');
-
+  
   try {
-    // フォルダが存在しない場合のガード
-    if (!fs.existsSync(imgDir)) {
-      return res.json({ message: 'まだ記事用の画像フォルダ(articleimg)がありません。' });
-    }
+    if (!fs.existsSync(imgDir)) return res.json({ message: 'フォルダがありません' });
 
-    // 1. articleimgフォルダ内の全ファイルを取得
     const allFiles = fs.readdirSync(imgDir);
-
-    // 2. 記事データを見て「使われている画像」のファイル名リストを作る
-    const posts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     const usedImages = new Set();
 
-    posts.forEach(post => {
-      // (A) サムネイル画像 (例: "img/articleimg/photo.jpg")
-      if (post.img) {
-        // パスがどうなっていても、ファイル名(photo.jpg)だけを取り出して登録
-        usedImages.add(path.basename(post.img));
-      }
+    if (fs.existsSync(path.join(__dirname, '../docs/info.json'))) {
+      const infoPosts = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/info.json'), 'utf8'));
+      collectUsedImages(infoPosts, usedImages);
+    }
+    if (fs.existsSync(path.join(__dirname, '../docs/tech.json'))) {
+      const techPosts = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/tech.json'), 'utf8'));
+      collectUsedImages(techPosts, usedImages);
+    }
 
-      // (B) 本文内の画像
-      if (post.contentMd) {
-        // 本文中の "img/..." っぽい文字列を全部探す
-        const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.\/]+/g);
-        if (matches) {
-          matches.forEach(match => {
-             // これもファイル名だけを取り出して登録
-            usedImages.add(path.basename(match));
-          });
-        }
-      }
-    });
-
-    // 3. 削除実行
     let deletedCount = 0;
     allFiles.forEach(file => {
       const filePath = path.join(imgDir, file);
-
-      // 念のためファイル以外（フォルダなど）は無視
       if (!fs.statSync(filePath).isFile()) return;
-
-      // 「使われているリスト」になければ削除！
       if (!usedImages.has(file)) {
         fs.unlinkSync(filePath);
-        console.log(`未使用画像を削除しました: ${file}`);
         deletedCount++;
       }
     });
 
-    res.json({ message: `articleimgフォルダから ${deletedCount} 個のゴミ画像を削除しました！` });
+    res.json({ message: `${deletedCount} 個のゴミ画像を削除しました！` });
 
   } catch (error) {
-    console.error('お掃除中にエラー:', error);
-    res.status(500).json({ message: '画像のお掃除に失敗しました。' });
+    console.error(error);
+    res.status(500).json({ message: 'お掃除失敗' });
   }
 });
 
-// ▼▼▼ サイト生成（更新）用API ▼▼▼
+function collectUsedImages(posts, set) {
+  posts.forEach(post => {
+    if (post.img) set.add(path.basename(post.img));
+    if (post.contentMd) {
+      const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.\/]+/g);
+      if (matches) {
+        matches.forEach(match => set.add(path.basename(match)));
+      }
+    }
+  });
+}
+
 app.post('/api/generate', (req, res) => {
-  console.log('サイト再生成のリクエストを受け付けました...');
-
-  // server.js の一つ上の階層にある generateArticle.js を指定
   const scriptPath = path.join(__dirname, '../generateArticle.js');
-
-  // コマンド実行 (node generateArticle.js)
   exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
     if (error) {
       console.error(`実行エラー: ${error}`);
-      return res.status(500).json({ message: 'サイト生成に失敗しました。ログを確認してください。' });
+      return res.status(500).json({ message: 'サイト生成失敗' });
     }
-
     console.log(`stdout: ${stdout}`);
-    if (stderr) console.error(`stderr: ${stderr}`);
-
-    res.status(200).json({ message: 'サイトの更新（HTML生成）が完了しました！' });
+    res.status(200).json({ message: 'サイト更新完了！' });
   });
 });
 
-// サーバーを起動
 app.listen(port, () => {
   console.log(`サーバーが http://localhost:${port} で起動しました`);
 });

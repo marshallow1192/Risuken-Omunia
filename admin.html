@@ -76,7 +76,14 @@
     <button id="cleanup-btn" class="admin-button" style="background-color: #6c757d; color: white; margin-left: 10px;">
       <i class="fa-solid fa-trash-can"></i> ゴミ画像をお掃除
     </button>
+
     <form id="post-form" onsubmit="return false;">
+      <label>カテゴリ:</label>
+      <select id="category" name="category" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+          <option value="info">お知らせ (info.json)</option>
+          <option value="tech">解説記事 (tech.json)</option>
+      </select>
+
       <label>タイトル:40文字以内</label>
       <input type="text" id="title" name="title" maxlength="40" required>
 
@@ -115,6 +122,12 @@
 <div class="edit">
   <hr>
 <h2>既存のお知らせ一覧</h2>
+
+<select id="filter-category" style="margin-bottom: 15px; padding: 5px;">
+            <option value="info">お知らせ一覧を表示</option>
+            <option value="tech">解説記事一覧を表示</option>
+        </select>
+
 <ul id="post-list">
   </ul>
 </div>
@@ -131,59 +144,42 @@ $(function() {
 
     // 記事一覧を読み込んで表示する関数
     async function loadPosts() {
-        try {
-            const response = await fetch(API_URL);
-            const posts = await response.json();
-            const $list = $('#post-list');
-            $list.empty(); // 一覧をクリア
+        const $list = $('#post-list');
+        $list.empty();
 
+        // 選択されているカテゴリ（info か tech）を取得
+        const category = $('#filter-category').val();
+
+        try {
+            // URLに ?cat=tech のようにカテゴリをつけてリクエスト
+            const response = await fetch(`${API_URL}?cat=${category}`);
+            const posts = await response.json();
+
+            // 新しい順に並んでいる前提で表示
             posts.forEach(post => {
-                // post.idNum が存在するか確認
-                const editLink = post.idNum ? `<a href="edit.html?id=${post.idNum}">[編集]</a>` : '[編集不可: IDなし]';
-                const $li = $(`
-      <li>
-        <span>${post.title} (${post.displayDate})</span>
-        <div>
-          <a href="edit.html?id=${post.idNum}" class="admin-button">[編集]</a>
-          <button class="admin-button delete-btn" data-id="${post.idNum}">[削除]</button>
-        </div>
-      </li>
-    `);
-                $list.append($li);
+                const date = new Date(post.date);
+                const displayDate = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+
+                // 編集リンクにも cat=... をつける（重要！）
+                // 削除ボタンにも data-cat をつける（重要！）
+                const li = `
+                    <li>
+                        <div class="post-info">
+                            <span class="post-date">${displayDate}</span>
+                            <span class="post-title">${post.title}</span>
+                        </div>
+                        <div class="post-actions">
+                            <a href="edit.html?id=${post.idNum}&cat=${category}" class="admin-button">編集</a>
+                            <button class="admin-button delete-btn" data-id="${post.idNum}" data-cat="${category}">削除</button>
+                        </div>
+                    </li>
+                `;
+                $list.append(li);
             });
         } catch (error) {
-            console.error('記事一覧の読み込みに失敗しました:', error);
+            console.error('読み込みエラー:', error);
         }
     }
-    // ...loadPosts関数の定義などの後...
-
-// 記事一覧(#post-list)の中の、.delete-btnがクリックされた時の処理
-$('#post-list').on('click', '.delete-btn', async function() {
-  // 1. 本当に削除して良いか確認する
-  if (!confirm('この記事を本当に削除しますか？元に戻せません。')) {
-    return; // キャンセルされたら何もしない
-  }
-
-  // 2. ボタンに埋め込まれたIDを取得
-  const postId = $(this).data('id');
-
-  // 3. サーバーにDELETEリクエストを送信
-  try {
-    const response = await fetch(`${API_URL}/${postId}`, {
-      method: 'DELETE',
-    });
-
-    const result = await response.json();
-    alert(result.message);
-
-    if (response.ok) {
-      loadPosts(); // 削除に成功したら、記事一覧を再読み込みして表示を更新
-    }
-  } catch (error) {
-    alert('削除中にエラーが発生しました。');
-    console.error(error);
-  }
-});
 
     // プレビューを更新する関数
     function updatePreview() {
@@ -288,6 +284,30 @@ $('#post-list').on('click', '.delete-btn', async function() {
     // --- 初期化処理 ---
     loadPosts();
     updatePreview();
+
+// ★追加：一覧の切り替えプルダウンを変えたら、リストを再読み込み
+    $('#filter-category').on('change', function() {
+        loadPosts();
+    });
+
+    // 削除ボタンのクリックイベント
+    $(document).on('click', '.delete-btn', async function() {
+        if(!confirm('本当に削除しますか？')) return;
+
+        const id = $(this).data('id');
+        const category = $(this).data('cat'); // ボタンに埋め込んだカテゴリを取得
+
+        try {
+            // 削除リクエストにも ?cat=... をつける
+            await fetch(`${API_URL}/${id}?cat=${category}`, { method: 'DELETE' });
+            alert('削除しました');
+            loadPosts(); // リストを更新
+        } catch (error) {
+            console.error(error);
+            alert('削除に失敗しました');
+        }
+    });
+
 });
 
 $('#generate-btn').on('click', async function() {
