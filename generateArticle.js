@@ -69,7 +69,7 @@ targets.forEach(target => {
     const renderData = {
       ...item,      // ★修正点：titleなどを直接参照できるように展開して渡す
       post: item,   // post.title と書く用
-      content: contentHtml,
+      contentMd: contentHtml,
       nextPost: nextPost,
       prevPost: prevPost
     };
