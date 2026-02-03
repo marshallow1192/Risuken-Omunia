@@ -4,8 +4,19 @@
     <title>記事編集ページ</title>
     <link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="../docs/style.css">
+    <link rel="stylesheet" href="docs/style.css">
     <link rel="apple-touch-icon" href="img/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+    window.MathJax = {
+        tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']], // $...$ で数式を書けるようにする設定
+        displayMath: [['$$', '$$'], ['\\[', '\\]']] // $$...$$ で数式ブロック
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <meta name="google-site-verification" content="FopI5soj9MaN8IgVC_4FoFFB4G7aFBI3CIDFDqXmuvY" />
     <style>
         /* 編集ページ専用のスタイル */
@@ -54,7 +65,6 @@
         <button type="submit">更新する</button>
     </form>
     <a href="admin.html">管理ページに戻る</a>
-    
     <div class="preview-area">
         <h2>プレビュー</h2>
         <article class="report-content">
@@ -105,12 +115,19 @@
             $('#preview-title').text(title || 'タイトルがここに表示されます');
             $('#preview-date').text(displayDate);
             $('#preview-content').html(marked.parse(contentMd || ''));
+            $('#preview-content pre code').each(function(i, block) {
+            hljs.highlightElement(block);
+        });
 
             if (imageInput.files && imageInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => $('#preview-image').attr('src', e.target.result).show();
                 reader.readAsDataURL(imageInput.files[0]);
             }
+            if (window.MathJax && window.MathJax.typesetPromise) {
+            // プレビューエリアの中だけ再変換する
+            window.MathJax.typesetPromise([document.querySelector('#preview-content')]).catch((err) => console.log(err));
+        }
         }
 
         // --- 既存データの取得とフォームへのセット ---

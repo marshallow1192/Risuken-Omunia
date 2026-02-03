@@ -120,7 +120,7 @@ app.get('/api/posts/:id', (req, res) => {
 
   try {
     if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
-    
+
     const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     const post = allPosts.find(p => p.idNum == req.params.id);
 

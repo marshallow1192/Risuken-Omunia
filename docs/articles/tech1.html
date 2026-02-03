@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> JetNet を使ってみた 1 | 大阪公立大学 自主ゼミサークル理数工学研究会 Omunia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 使用するフォントの取り込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <!-- スライドショー用のライブラリ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- アイコンフォントの取り込み -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>
+    window.MathJax = {
+        tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']], // $...$ で数式を書けるようにする設定
+        displayMath: [['$$', '$$'], ['\\[', '\\]']] // $$...$$ で数式ブロック
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>hljs.highlightAll();</script>
+    <link rel="stylesheet" href="../style.css">
+<link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
+
+  <link rel="apple-touch-icon" href="img/favicon.png">
+<meta name="google-site-verification" content="FopI5soj9MaN8IgVC_4FoFFB4G7aFBI3CIDFDqXmuvY" />
+  </head>
+  <body class="article">
+    <header>
+      <h1 class="site-logo">
+      <a href="../index.html">りすけん Omunia</a>
+    </h1>
+      <nav class="header-nav">
+        <ul class="menu-group">
+          <li class="menu-items"><a href="../introduction.html">どんなサークル？ </a></li>
+          <li class="menu-items"><a href="../seminars-list.html">自主ゼミ一覧</a></li>
+          <li class="menu-items"><a href="../information.html">お知らせ</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger-menu" aria-label="メニューを開く">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    </header>
+
+    <main class="infoContainer">
+      <article class="reportContents">
+        <h2><span class="section-sub-title">Article</span></h2>
+        <h1><span class="section-title-information"> JetNet を使ってみた 1 </span></h1>
+        <hr>
+        <p class="displayDate">公開日 : 2026年2月3日</p>
+
+        <img class="topImage" src=../img/articleimg/1770083930783-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-01-28174506.png>
+        <div class="contents">
+          <h1>はじめに</h1>
+<p>物理学科に来てしまった故ひさしくpython と ai 関係のことをしていなかったのでリハビリを込めてGNNを用いて分類タスクを行ってみました．</p>
+<p>普通のやっても面白くない(訳:物理関係のことをやりたい)ので今回はJetNet という素粒子のジェットについてのデータセットを用いました．</p>
+<p>このJetNet かなり物理学科の人間としてはおもしろいものなのですが，qiita にも記事がなかったのでこのデータセットの使い方と今回行ったことの記録を書いておきます．</p>
+<p>物理学科の人間にとってのMNISTになる未来が見えるかも....？</p>
+<p>今回はデータセットの読み込み方法とデータの内容について解説します．</p>
+<h2>JetNet を導入する</h2>
+<p>お手元の仮想環境なりColab なりを開いていつも通り</p>
+<pre><code class="language-python">pip install jetnet
+</code></pre>
+<p>とすればインストールできます．仮想環境ならこれでよいのですがなぜかColabでやろうとすると一度セッションを切られてしまいます(おそらくColabにはいってるnumpyとかのライブラリの古いバージョンを無理やりダウンロードしようとしてるから??)</p>
+<p>ですがセッションを再起動したら問題なく動きます</p>
+<h2>データセットを導入</h2>
+<p>データセットを導入しましょう．</p>
+<pre><code class="language-python">from jetnet.datasets import JetNet
+
+particle_data, jet_data = JetNet.getData(
+
+    jet_type=[&quot;g&quot;,&quot;q&quot;,&quot;t&quot;,&quot;w&quot;,&quot;z&quot;], data_dir=&quot;./datasets/jetnet/&quot;, download=True
+
+)
+</code></pre>
+<p>この関数の引数の jet_type はどの種類のジェットを読み込むかを示しており，</p>
+<table>
+<thead>
+<tr>
+<th align="left">記号</th>
+<th align="center">ジェットの種類</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">g</td>
+<td align="center">グルーオン</td>
+</tr>
+<tr>
+<td align="left">q</td>
+<td align="center">クォーク</td>
+</tr>
+<tr>
+<td align="left">t</td>
+<td align="center">τ粒子</td>
+</tr>
+<tr>
+<td align="left">w</td>
+<td align="center">Wボソン</td>
+</tr>
+<tr>
+<td align="left">z</td>
+<td align="center">Zボソン</td>
+</tr>
+</tbody></table>
+<p>となっており，必要な分だけ取り出すことができます．</p>
+<p>(例えばグルーオンとクォークのデータだけほしかったら jet_type=[&quot;g&quot;,&quot;q&quot;] とすればよろし)</p>
+<p>このデータセットを読み込む際にデータがダウンロードされますが，その保存場所は data_dir により定められます．</p>
+<h4>もしColabでこのデータセットを読み込む際，ご自身の Drive に接続してそこにダウンロードしないとセッションを立ち上げるたびにリセットされていちいちダウンロードすることになるのでマウントしてからダウンロードしましょう．</h4>
+<p>返り値の１つ目に1つのジェットに含まれるそれぞれの粒子のデータが二次元配列として入り，２つ目に１つのジェット全体としてのデータが入ります．</p>
+<p>粒子のデータはこのようになっており</p>
+<pre><code class="language-python">例
+
+particle_data[0][0] 
+
+[0.06290796, 0.05512052, 0.36435664, 1]
+
+#[&quot;etarel&quot;, &quot;phirel&quot;, &quot;ptrel&quot;, &quot;mask&quot;]
+</code></pre>
+<p>0番目と1番目のデータがそれぞれ $ \eta_{rel} $ $ \phi_{rel} $ というジェットの中心軸からその粒子が$ \eta $ $ \phi $ 方向にどれだけ離れているかを表す相対的な量となっています．</p>
+<p>$ \eta_{rel} = \eta_{particle} - \eta_{jet} $</p>
+<p>$ \phi_{rel} = \phi_{particle} - \phi_{jet} $</p>
+<p>これのおかげでデータの回転対称性が担保されています．</p>
+<p>2番目のデータが運動量を示し，ジェット全体の運動量とその粒子一つが持つ運動量の比として保存されています．</p>
+<p>3番目のデータはそのデータがゼロ埋めとして追加されたものかどうかを示しており，1だったら有効なデータであり，0ならそれがゼロ埋めとして追加されたものであることを示しています．</p>
+<h4>なので分析の際はここが1のデータのみ使いましょう．</h4>
+<p>またジェットのデータはこのようになっており，</p>
+<pre><code class="language-python">例
+jet_data[0]
+
+[4, 1.05790161e+03, 4.72092062e-01, 8.89337082e+01,30]
+#[&quot;type&quot;, &quot;pt&quot;, &quot;eta&quot;, &quot;mass&quot;, &quot;num_particles&quot;]
+</code></pre>
+<p>0番目のデータがそのジェットの種類を表し，データセットを読み込むときに指定した jet_type の配列の要素の位置として表されています．</p>
+<p>(上の例なら[&quot;g&quot;,&quot;q&quot;,&quot;t&quot;,&quot;w&quot;,&quot;z&quot;] の４番目なのでZボソンのデータ)</p>
+<p>1から3番目のデータはそれぞれジェットの運動量，検出器の中心からの角度，ジェットの質量 を表しています．</p>
+<p>そして4番目のデータは１つのジェットに含まれる粒子の数を示しています．これは１つのジェットに対する粒子のデータでmask = 1 つまり有効なデータの数を示しています．</p>
+<p>データとJetNetの解説はこんな感じです．</p>
+<p>getData 関数はほかに粒子データ，ジェットデータを正規化するかなどを指定する引数があるのですが今回は使わないので省きました．詳しく見たい方はこちらの<a href="https://jetnet.readthedocs.io/en/latest/pages/datasets.html">公式サイト</a>をご参照ください．</p>
+<p>今回は以上です</p>
+<p>次回は実際にGNNに読み込ませる際に必要となってくる隣接行列の作り方，モデルの構造，学習のさせ方について解説します．</p>
+<p>ここまでご覧いただき誠にありがとうございます．</p>
+
+        </div>
+        <div class="article-navigation">
+        
+        <div class="nav-placeholder"></div>
+      
+
+      <a href="../information.html" class="nav-btn list">
+        <i class="fa-solid fa-list"></i> 一覧
+      </a>
+
+      
+        <div class="nav-placeholder"></div>
+      
+    </div>
+      </article>
+    </main>
+
+  <div class="belt">
+    <h2><span class="belt-items">興味のある方はメールやDMにてお気軽にご連絡ください！</span></h2>
+  </div>
+  <div class="contact">
+    <h2><span class="section-sub-title-contact">Contact</span></h2>
+    <div class="contact-buttons-container">
+      <a href="mailto:circle.omunia@gmail.com" class="btn-sns btn-mail">
+        <i class="fa-solid fa-envelope"></i>
+        <span>メールでお問い合わせ</span>
+      </a>
+
+      <a href="https://x.com/risuken_OMUnia" class="btn-sns btn-twitter" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-x-twitter"></i>
+        <span>XのDMでお問い合わせ</span>
+      </a>
+
+    </div>
+  </div>
+  <div class="copyright">
+    <small>&copy; 2025 大阪公立大学 理数工学研究会Omunia.</small>
+  </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.swiper', {
+        // オプション設定
+        loop: true, // ループさせる
+        speed: 1000, // 切り替わる時のスピード
+        autoplay: {
+          delay: 4000, // 4秒ごとに自動再生
+          disableOnInteraction: false, // ユーザーが操作しても自動再生を止めない
+        },
+        pagination: {
+          el: '.swiper-pagination', // ページネーションの要素
+          clickable: true, // クリックでスライドを切り替え
+        },
+        navigation: {
+          nextEl: '.swiper-button-next', // 「次へ」ボタンの要素
+          prevEl: '.swiper-button-prev', // 「前へ」ボタンの要素
+        },
+      });
+
+      async function setupInformation() {
+        const response = await fetch("info.json");
+        const informationData = await response.json();
+
+        // --- 設定項目 ---
+        const itemsPerPage = 4; // 1ページに表示するカードの数
+
+        // --- データを使ってカードのHTMLを生成し、card-listに追加 ---
+        const $cardList = $('.card-list'); // jQueryでは$を変数名に付ける慣習がある
+        $.each(informationData.slice(0,4), function(index, item) {
+          const cardHTML = `
+            <a href="${item.link}" class="card">
+              <article>
+                <img class="card-image" src="${item.img}" alt="">
+                <div class="card-content">
+                  <h3 class="card-title">${item.title}</h3>
+                  <time class="card-date" datetime="${item.date}">${item.displayDate}</time>
+                </div>
+              </article>
+            </a>
+          `;
+          $cardList.append(cardHTML); // card-listの末尾にHTMLを追加
+        });
+
+
+        }
+
+      $(function() { // ページが読み込まれたら実行する、jQueryのお作法
+      setupInformation();
+      $('.hamburger-menu').on('click', function() {
+      // ボタンとナビゲーションメニューに 'is-open' クラスを付け外し
+      $(this).toggleClass('is-open');
+      $('.header-nav').toggleClass('is-open');
+    });
+      });
+    </script>
+  </body>
+</html>

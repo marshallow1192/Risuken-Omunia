@@ -4,7 +4,7 @@
     <title>投稿用ページ</title>
   <link rel="stylesheet" href="../docs/style.css">
 <link rel="icon" href="img/favicon.png" sizes="192x192" type="image/png">
-  
+<link rel="stylesheet" href="docs/style.css">
   <link rel="apple-touch-icon" href="img/favicon.png">
 <meta name="google-site-verification" content="FopI5soj9MaN8IgVC_4FoFFB4G7aFBI3CIDFDqXmuvY" />
       <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@100..900&family=Stick&family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>
+    window.MathJax = {
+        tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']], // $...$ で数式を書けるようにする設定
+        displayMath: [['$$', '$$'], ['\\[', '\\]']] // $$...$$ で数式ブロック
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
     /* 編集ページ専用のスタイル */
     body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
@@ -197,6 +208,13 @@ $(function() {
         $('#preview-title').text(title || 'タイトルがここに表示されます');
         $('#preview-date').text(displayDate);
         $('#preview-content').html(marked.parse(contentMd || ''));
+        $('#preview-content pre code').each(function(i, block) {
+            hljs.highlightElement(block);
+        });
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+            // プレビューエリアの中だけ再変換する
+            window.MathJax.typesetPromise([document.querySelector('#preview-content')]).catch((err) => console.log(err));
+        }
 
         if (imageInput.files && imageInput.files[0]) {
             const reader = new FileReader();

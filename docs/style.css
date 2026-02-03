@@ -196,7 +196,7 @@ header{
 }
 
 .article .section-title-information {
-  font-size: clamp(0.5rem, 0.5rem + 3vw, 3.125rem);
+  font-size: clamp(0.8rem, 0.8rem + 3vw, 3.125rem);
 }
 
 .section-sub-title {
@@ -557,8 +557,8 @@ hr {
   margin:0 0;
   padding-top: 80px;
   padding-bottom: 80px;
-  padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
-  padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);
+  /*padding-left: clamp(0.15rem, 0.15rem + 6vw, 6.25rem);
+  padding-right: clamp(0.15rem, 0.15rem + 6vw, 5rem);*/
   background-color:rgba(240, 245, 255, 0.5);
   text-align: center;
 }
@@ -593,18 +593,18 @@ hr {
 
   /* 記事本文の文字サイズを小さくする */
   .contents, .markdown-body {
-    font-size: 12px;       /* PCより少し小さく（PCは通常16px） */
+    font-size: 16px;       /* PCより少し小さく（PCは通常16px） */
     line-height: 1.6;      /* 行間も少し詰める */
   }
 
   /* 見出し（h1, h2）もスマホだと大きすぎるので調整 */
   .contents h1, .markdown-body h1 {
-    font-size: 20px;       /* 大見出し */
+    font-size: 22px;       /* 大見出し */
     margin-top: 30px;
   }
 
   .contents h2, .markdown-body h2 {
-    font-size: 18px;       /* 中見出し */
+    font-size: 20px;       /* 中見出し */
     margin-top: 20px;
   }
 }
@@ -633,7 +633,7 @@ hr {
 /* ▼▼▼ スマホの時だけ、もう少し大きく見せたい場合 ▼▼▼ */
 @media screen and (max-width: 768px) {
   .reportContents img, 
-  .contents img, 
+  .contents img,
   .markdown-body img {
     width: 100%;        /* スマホなら横幅いっぱいでOK */
     border-radius: 4px; /* スマホなら角丸は控えめに */
@@ -903,4 +903,51 @@ hr {
   .nav-placeholder {
     display: none;
   }
+}
+
+/* コードブロックの見た目を調整 */
+pre code.hljs {
+    border-radius: 6px;       /* 角を少し丸くする */
+    font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace; /* プログラミング用フォント */
+    font-size: 0.95em;        /* 文字サイズ調整 */
+    line-height: 1.5;         /* 行間を少し広げる */
+    padding: 1.2em !important; /* 内側の余白を広めに */
+    margin: 1.5em 0;          /* 外側の余白 */
+}
+
+/* ▼▼▼ 表（テーブル）のデザイン ▼▼▼ */
+.article-content table {
+    width: 100%;            /* 横幅いっぱいに広げる */
+    border-collapse: collapse; /* 枠線を重ねてスッキリさせる */
+    margin: 20px 0;         /* 上下の余白 */
+    font-size: 0.95em;
+}
+
+.article-content th, 
+.article-content td {
+    border: 1px solid #ddd; /* 薄いグレーの枠線 */
+    padding: 10px 15px;     /* セル内の余白 */
+    line-height: 1.4;
+}
+
+/* ヘッダー（見出し）の見た目 */
+.article-content th {
+    background-color: #f5f8fa; /* 薄い青グレーっぽい色 */
+    font-weight: bold;
+    text-align: center;     /* ヘッダーは中央揃え */
+    color: #333;
+}
+
+/* 1行おきに色を変える（シマシマにする） */
+.article-content tr:nth-child(even) {
+    background-color: #fdfdfd;
+}
+
+/* スマホで見たときに横スクロールできるようにする（必須！） */
+@media (max-width: 600px) {
+    .article-content table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
