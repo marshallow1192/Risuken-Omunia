@@ -1,0 +1,11 @@
+
+  {
+    "idNum": 1,
+    "link": "articles/article1.html",
+    "date": "2025-04-11",
+    "img": "../img/articleimg/slide1.webp",
+    "title": "本日量子力学ゼミが開催されました！",
+    "displayDate": "2025年4月11日",
+    "category": "info",
+    "contentMd": "<p>本日，森ノ宮キャンパスにて量子力学ゼミが行われました！<br>教科書は砂川先生の量子力学を使用しています！</p>"
+  }

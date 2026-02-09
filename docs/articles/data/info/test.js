@@ -14,38 +14,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ▼▼▼ 変更：データの保存場所を「docs」から「backend/data」に変更 ▼▼▼
-const getDataDir = (category) => {
-  return path.join(__dirname, '../docs/articles', 'data', category);
+const getFileHash = (filePath) => {
+  const fileBuffer = fs.readFileSync(filePath);
+  const hashSum = crypto.createHash('sha256');
+  hashSum.update(fileBuffer);
+  return hashSum.digest('hex');
 };
 
-// ▼▼▼ 追加：フォルダ内のJSONを全部読んで、1つの配列にする関数 ▼▼▼
-function getAllPosts(category) {
-  const dirPath = getDataDir(category);
-
-  // フォルダがなければ作る
-  if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-      return [];
-  }
-
-  const files = fs.readdirSync(dirPath);
-  const allData = files
-      .filter(file => file.endsWith('.json')) // JSONファイルだけ選ぶ
-      .map(file => {
-          try {
-            const content = fs.readFileSync(path.join(dirPath, file), 'utf8');
-            return JSON.parse(content);
-          } catch (e) {
-            console.error(`JSON読み込みエラー: ${file}`, e);
-            return null;
-          }
-      })
-      .filter(data => data !== null); // エラーだったやつは除外
-
-  // 日付順（新しい順）に並び替える
-  return allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
+// カテゴリに応じたファイルパス取得
+const getFilePath = (category) => {
+  return category === 'tech' ? '../docs/tech.json' : '../docs/info.json';
+};
 
 // ▼▼▼ multerの設定 ▼▼▼
 const storage = multer.diskStorage({
@@ -75,7 +54,6 @@ const optimizeImage = async (filePath) => {
     console.error('画像圧縮失敗:', error);
   }
 };
-
 
 // ▼▼▼ 画像アップロードAPI ▼▼▼
 app.post('/api/upload-image', upload.single('image'), async(req, res) => {
@@ -113,14 +91,21 @@ app.post('/api/upload-image', upload.single('image'), async(req, res) => {
 
 
 // ==================================================
-// ▼▼▼ 記事操作API（1記事1ファイル版） ▼▼▼
+// ▼▼▼ 記事操作API ▼▼▼
 // ==================================================
 
 // 1. 記事一覧取得 (GET)
 app.get('/api/posts', (req, res) => {
   const category = req.query.cat || 'info';
+  const dataPath = path.join(__dirname, getFilePath(category));
+
   try {
-    const posts = getAllPosts(category);
+    if (!fs.existsSync(dataPath)) {
+      return res.json([]);
+    }
+    const rawData = fs.readFileSync(dataPath, 'utf8');
+    const posts = JSON.parse(rawData);
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     res.status(200).json(posts);
   } catch (error) {
     console.error(error);
@@ -131,13 +116,15 @@ app.get('/api/posts', (req, res) => {
 // 2. 個別記事取得 (GET)
 app.get('/api/posts/:id', (req, res) => {
   const category = req.query.cat || 'info';
-  const dirPath = getDataDir(category);
-  // ID = ファイル名 (例: python-intro) なので、そのまま探す
-  const filePath = path.join(dirPath, `${req.params.id}.json`);
+  const dataPath = path.join(__dirname, getFilePath(category));
 
   try {
-    if (fs.existsSync(filePath)) {
-      const post = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
+
+    const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const post = allPosts.find(p => p.idNum == req.params.id);
+
+    if (post) {
       res.status(200).json(post);
     } else {
       res.status(404).json({ message: '記事が見つかりません。' });
@@ -147,67 +134,61 @@ app.get('/api/posts/:id', (req, res) => {
   }
 });
 
-// 3. 新規投稿 (POST)
+// 3. 新規投稿 (POST) ★ここを修正しました★
 app.post('/api/posts', upload.single('image'), async(req, res) => {
   console.log('受け取ったデータ:', req.body);
-  const category = req.body.category || 'info';
-  const dirPath = getDataDir(category);
+  const category = req.body.category || 'info'; 
+  const dataPath = path.join(__dirname, getFilePath(category));
 
-  // フォルダ作成
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  // ★修正1：データを先に読み込んで、最大IDを計算する
+  let currentData = [];
+  if (fs.existsSync(dataPath)) {
+    currentData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   }
 
-  let idNum;
-  // カスタムID（URLに使われる名前）の決定
-  if (req.body.customId && req.body.customId.trim() !== '') {
-    idNum = req.body.customId.trim();
-    // ファイル重複チェック (idNum.json があるかどうか)
-    if (fs.existsSync(path.join(dirPath, `${idNum}.json`))) {
-      console.log(`⚠️ ID "${idNum}" は使用済みのため、時間を付与します。`);
-      idNum = `${idNum}-${Date.now()}`;
-    }
-  } else {
-    // 空欄ならタイムスタンプ
-    idNum = Date.now().toString();
-  }
+  // 既存のIDの中から最大値を探す（なければ0）
+  // 念のため Number() で数値化してから比較します
+  const maxId = currentData.length > 0 
+    ? Math.max(...currentData.map(p => Number(p.idNum) || 0)) 
+    : 0;
+  
+  // 新しいIDは 最大値 + 1
+  const newId = maxId + 1;
 
+
+  // ★修正2：カテゴリに応じてファイル名を変える
+  // techなら "articles/tech1.html", infoなら "articles/article1.html"
   const filenamePrefix = category === 'tech' ? 'tech' : 'article';
-  // リンクはシンプルに "articles/ID.html" 形式にする（お好みで調整可）
-  // 連番風にしたければここを調整ですが、ファイル名管理ならIDそのままが綺麗です
-  const linkName = `articles/${idNum}.html`; 
+  const newLink = `articles/${filenamePrefix}${newId}.html`;
 
-  // 本文の画像パス修正
+
+  // 本文のパス置換
   if (req.body.contentMd) {
     req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
   }
 
-  const newPost = {
-    idNum: idNum,
-    title: req.body.title,
-    date: req.body.date,
-    category: category,
-    displayDate: req.body.displayDate,
-    contentMd: req.body.contentMd,
-    link: req.body.link || linkName,
-    img: ''
-  };
+  // 新しい投稿データ作成
+  const newPost = req.body;
+  newPost.idNum = newId;  // 連番ID
+  newPost.link = newLink; // 新しい命名規則のリンク
+  newPost.category = category;
 
   // 画像処理
   if (req.file) {
     await optimizeImage(req.file.path);
     newPost.img = `../img/articleimg/${req.file.filename.replace(/\s+/g,"")}`;
-  } else if (req.body.existingImage) {
-    newPost.img = req.body.existingImage;
+  } else {
+    newPost.img = ''; 
   }
 
   try {
-    // ★重要：個別のJSONファイルとして保存
-    fs.writeFileSync(path.join(dirPath, `${idNum}.json`), JSON.stringify(newPost, null, 2), 'utf8');
-    
-    res.status(200).json({ message: `【${category}】記事(ID:${idNum})を保存しました！\n「サイトを更新して公開」を押すと反映されます。` });
+    // 先頭に追加して保存
+    currentData.unshift(newPost);
+    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2), 'utf8');
+
+    res.status(200).json({ message: `【${category}】記事(ID:${newId})を投稿しました！` });
   } catch (error) {
-    console.error('保存エラー:', error);
+    console.error('投稿エラー:', error);
     res.status(500).json({ message: '保存に失敗しました。' });
   }
 });
@@ -215,30 +196,37 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
 // 4. 記事更新 (PUT)
 app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
   const category = req.body.category || 'info';
-  const dirPath = getDataDir(category);
-  const filePath = path.join(dirPath, `${req.params.id}.json`);
+  
+  if (req.body.contentMd) {
+    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+  }
+
+  const targetCategory = req.query.cat || req.body.category || 'info';
+  const dataPath = path.join(__dirname, getFilePath(targetCategory));
 
   try {
-    if (!fs.existsSync(filePath)) return res.status(404).json({ message: '記事ファイルがありません' });
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
 
-    const currentPost = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const postIndex = allPosts.findIndex(p => p.idNum == req.params.id);
 
-    if (req.body.contentMd) {
-      req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+    if (postIndex === -1) {
+      return res.status(404).json({ message: '更新対象の記事が見つかりません。' });
     }
+
     if (req.file) {
       await optimizeImage(req.file.path);
     }
 
     const updatedPost = {
-      ...currentPost,
+      ...allPosts[postIndex],
       ...req.body,
-      img: req.file ? `../img/articleimg/${req.file.filename}` : currentPost.img,
-      category: category
+      img: req.file ? `../img/articleimg/${req.file.filename}` : allPosts[postIndex].img,
+      category: targetCategory
     };
     
-    // 上書き保存
-    fs.writeFileSync(filePath, JSON.stringify(updatedPost, null, 2), 'utf8');
+    allPosts[postIndex] = updatedPost;
+    fs.writeFileSync(dataPath, JSON.stringify(allPosts, null, 2), 'utf8');
     
     res.status(200).json({ message: '記事を更新しました！' });
 
@@ -251,28 +239,34 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
 // 5. 記事削除 (DELETE)
 app.delete('/api/posts/:id', (req, res) => {
   const category = req.query.cat || 'info';
-  const dirPath = getDataDir(category);
-  const filePath = path.join(dirPath, `${req.params.id}.json`);
+  const dataPath = path.join(__dirname, getFilePath(category));
 
   try {
-    // JSONファイルの削除
-    if (fs.existsSync(filePath)) {
-      // まずファイルの中身を読んで、リンク先のHTMLも消す
-      const post = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      const htmlFilePath = path.join(__dirname, '../docs/', post.link);
-      
-      if (fs.existsSync(htmlFilePath)) {
-        fs.unlinkSync(htmlFilePath);
-      }
+    if (!fs.existsSync(dataPath)) return res.status(404).json({ message: 'ファイルなし' });
 
-      fs.unlinkSync(filePath); // JSON本体を削除
-      res.status(200).json({ message: '記事データを削除しました。' });
-    } else {
-      res.status(404).json({ message: 'ファイルが見つかりません' });
+    const allPosts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const postToDelete = allPosts.find(p => p.idNum == req.params.id);
+
+    if (!postToDelete) {
+      return res.status(404).json({ message: '削除対象が見つかりません。' });
     }
+
+    // HTMLファイルの削除
+    const htmlFilePath = path.join(__dirname, '../docs/', postToDelete.link);
+    if (fs.existsSync(htmlFilePath)) {
+      fs.unlinkSync(htmlFilePath);
+      console.log(`${htmlFilePath} を削除しました。`);
+    }
+
+    // JSONから削除
+    const updatedPosts = allPosts.filter(p => p.idNum != req.params.id);
+    fs.writeFileSync(dataPath, JSON.stringify(updatedPosts, null, 2), 'utf8');
+
+    res.status(200).json({ message: '記事とHTMLを削除しました。' });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: '削除失敗' });
+    res.status(500).json({ message: 'サーバーエラー' });
   }
 });
 
@@ -325,33 +319,16 @@ function collectUsedImages(posts, set) {
   });
 }
 
-app.post('/api/generate', async (req, res) => {
-  try {
-    console.log('サイト生成を開始します...');
-
-    // 1. Tech記事をフォルダから全部集めて、docs/tech.json に書き出す（ガッチャンコ！）
-    const allTech = getAllPosts('tech');
-    fs.writeFileSync(path.join(__dirname, '../docs/tech.json'), JSON.stringify(allTech, null, 2));
-
-    // 2. Info記事も同様にガッチャンコ
-    const allInfo = getAllPosts('info');
-    fs.writeFileSync(path.join(__dirname, '../docs/info.json'), JSON.stringify(allInfo, null, 2));
-
-    // 3. これまで通り generateArticle.js を動かしてHTMLを作る
-    const scriptPath = path.join(__dirname, '../generateArticle.js');
-    exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`実行エラー: ${error}`);
-        return res.status(500).json({ message: 'サイト生成失敗' });
-      }
-      console.log(`stdout: ${stdout}`);
-      res.status(200).json({ message: '全記事を統合してサイトを更新しました！' });
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: '生成処理中にエラーが発生しました' });
-  }
+app.post('/api/generate', (req, res) => {
+  const scriptPath = path.join(__dirname, '../generateArticle.js');
+  exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`実行エラー: ${error}`);
+      return res.status(500).json({ message: 'サイト生成失敗' });
+    }
+    console.log(`stdout: ${stdout}`);
+    res.status(200).json({ message: 'サイト更新完了！' });
+  });
 });
 
 app.listen(port, () => {

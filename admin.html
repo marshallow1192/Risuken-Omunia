@@ -94,6 +94,11 @@
           <option value="info">お知らせ (info.json)</option>
           <option value="tech">解説記事 (tech.json)</option>
       </select>
+      <div class="form-group">
+                <label for="customId">記事ID（URLになります）</label>
+                <input type="text" id="customId" name="customId" placeholder="例: tech-01, python-intro（空白なら自動生成）">
+                <p style="font-size: 0.8em; color: #666;">※半角英数字とハイフンのみ。他と被らない名前にしてください。</p>
+      </div>
 
       <label>タイトル:40文字以内</label>
       <input type="text" id="title" name="title" maxlength="40" required>
@@ -234,6 +239,8 @@ $(function() {
         const date = new Date(formData.get('date'));
         const displayDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
         formData.append('displayDate', displayDate);
+        //const customIdVal = $('#customId').val();
+        //formData.append('customId', customIdVal);
 
         try {
             const response = await fetch(API_URL, {

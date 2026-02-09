@@ -1,0 +1,11 @@
+
+  {
+    "idNum": 2,
+    "link": "articles/article2.html",
+    "date": "2025-04-12",
+    "img": "../img/articleimg/slide2.jpg",
+    "title": "本日線形代数ゼミが開催されました！",
+    "displayDate": "2025年4月12日",
+    "category": "info",
+    "contentMd": "<p>本日，森ノ宮キャンパスにて線形代数ゼミが行われました！<br>教科書は斎藤先生の線型代数入門を使用しています！</p>"
+  }

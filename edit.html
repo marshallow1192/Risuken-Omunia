@@ -40,6 +40,11 @@
         <i class="fa-solid fa-rotate"></i> サイトを更新して公開する
     </button>
     <form id="edit-form">
+    <div class="form-group">
+            <label for="customId">記事ID（URLになります）</label>
+            <input type="text" id="customId" name="customId" placeholder="例: tech-01, python-intro（空白なら自動生成）">
+                <p style="font-size: 0.8em; color: #666;">※半角英数字とハイフンのみ。他と被らない名前にしてください。</p>
+    </div>
         <label>タイトル:40文字以内</label>
         <input type="text" id="title" name="title" maxlength="40" required>
 
@@ -89,7 +94,7 @@
         const params = new URLSearchParams(window.location.search);
         const postId = params.get('id');
         // カテゴリが指定されていなければ 'info' (お知らせ) とみなす
-        const category = params.get('cat') || 'info'; 
+        const category = params.get('cat') || 'info';
 
         if (!postId) {
             alert('編集する記事のIDが指定されていません。');
@@ -140,6 +145,7 @@
 
             $('#title').val(postData.title);
             $('#date').val(postData.date);
+            $('#customId').val(postData.customId);
 
             // 本文のパス修正
             let fixedContent = postData.contentMd || '';
