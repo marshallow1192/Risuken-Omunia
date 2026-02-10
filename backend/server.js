@@ -8,6 +8,8 @@ const sharp = require('sharp');
 const app = express();
 const port = 3000;
 
+const DELETE_PASSWORD = "omunia-delete";
+
 const { exec } = require('child_process');
 
 app.use(cors());
@@ -256,7 +258,14 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
 });
 
 // 5. 記事削除 (DELETE)
+// 5. 記事削除 (DELETE)
 app.delete('/api/posts/:id', (req, res) => {
+  // ▼▼▼ 追加：パスワードチェック ▼▼▼
+  // 画面から送られてきたパスワードが、設定したものと合っているか確認
+  if (req.body.password !== DELETE_PASSWORD) {
+    return res.status(403).json({ message: 'パスワードが違います！削除できません。' });
+  }
+
   const category = req.query.cat || 'info';
   const dirPath = getDataDir(category);
   const filePath = path.join(dirPath, `${req.params.id}.json`);
@@ -267,7 +276,6 @@ app.delete('/api/posts/:id', (req, res) => {
       // まずファイルの中身を読んで、リンク先のHTMLも消す
       const post = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const htmlFilePath = path.join(__dirname, '../docs/', post.link);
-      
       if (fs.existsSync(htmlFilePath)) {
         fs.unlinkSync(htmlFilePath);
       }
