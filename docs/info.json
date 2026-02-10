@@ -1,5 +1,15 @@
 [
   {
+    "idNum": "test",
+    "title": "wdasvfcbnm",
+    "date": "2026-02-10",
+    "category": "info",
+    "displayDate": "2026年2月10日",
+    "contentMd": "dsaaaaaasasd",
+    "link": "articles/test.html",
+    "img": "../img/articleimg/1770726033490-img_6326497956d250edf2a0e69e0dee28503848538.jpg"
+  },
+  {
     "category": "info",
     "title": "本日 中原トポロジーゼミが開催されました！！",
     "date": "2026-01-30",
