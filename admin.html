@@ -185,6 +185,9 @@ $(function() {
                             <span class="post-title">${post.title}</span>
                         </div>
                         <div class="post-actions">
+                            <a href="docs/${post.link}" target="_blank" class="admin-button" style="margin-right: 5px;">
+                                <i class="fa-solid fa-external-link-alt"></i> 確認
+                            </a>
                             <a href="edit.html?id=${post.idNum}&cat=${category}" class="admin-button">編集</a>
                             <button class="admin-button delete-btn" data-id="${post.idNum}" data-cat="${category}">削除</button>
                         </div>
