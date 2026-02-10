@@ -11,6 +11,6 @@
   "description": "",
   "dependencies": {
     "ejs": "^3.1.10",
-    "marked": "^16.3.0"
+    "marked": "^4.3.0"
   }
 }
