@@ -14,6 +14,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(path.join(__dirname, '../')));
+
 // ▼▼▼ 変更：データの保存場所を「docs」から「backend/data」に変更 ▼▼▼
 const getDataDir = (category) => {
   return path.join(__dirname, '../docs/articles', 'data', category);
