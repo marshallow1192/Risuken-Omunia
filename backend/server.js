@@ -16,6 +16,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, '../')));
 
+app.get('/', (req, res) => {
+    // アクセスしてきたら、即座に admin.html へ飛ばす！
+    res.redirect('/admin.html');
+});
+
 // ▼▼▼ 変更：データの保存場所を「docs」から「backend/data」に変更 ▼▼▼
 const getDataDir = (category) => {
   return path.join(__dirname, '../docs/articles', 'data', category);

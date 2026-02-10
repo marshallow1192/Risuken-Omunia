@@ -6,7 +6,7 @@
   "forwardPorts": [3000],
 
   // 起動したときに自動でやるコマンド
-  "postCreateCommand": "cd backend && npm install && cd ..",
+  "postCreateCommand": "npm install && npm install marked@4 && cd backend && npm install && cd ..",
 
   "customizations": {
     "vscode": {
