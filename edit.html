@@ -88,7 +88,7 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     $(async function() {
-        const API_URL = 'http://localhost:3000/api/posts';
+        const API_URL = '/api/posts';
 
         // 1. URLから編集したい記事のIDとカテゴリを取得
         const params = new URLSearchParams(window.location.search);
@@ -163,7 +163,7 @@
                     displayImgPath = displayImgPath.replace('docs/', '');
                 }
                 
-                const fullPath = `http://localhost:3000/${displayImgPath}`;
+                const fullPath = `/${displayImgPath}`;
                 $('#current-image').attr('src', fullPath).show();
                 $('#preview-image').attr('src', fullPath).show();
             }
@@ -187,7 +187,7 @@
             formData.append('image', file);
 
             try {
-                const response = await fetch('http://localhost:3000/api/upload-image', {
+                const response = await fetch('/api/upload-image', {
                     method: 'POST',
                     body: formData
                 });
@@ -221,7 +221,7 @@
             const originalText = $btn.html();
             $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 更新中...');
             try {
-                const response = await fetch('http://localhost:3000/api/generate', { method: 'POST' });
+                const response = await fetch('/api/generate', { method: 'POST' });
                 const result = await response.json();
                 if (response.ok) {
                     alert(result.message);

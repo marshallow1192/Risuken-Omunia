@@ -154,7 +154,7 @@
 <script>
 $(function() {
     // --- グローバル変数 ---
-    const API_URL = 'http://localhost:3000/api/posts';
+    const API_URL = '/api/posts';
 
     // --- 関数定義 ---
 
@@ -273,7 +273,7 @@ $(function() {
       formData.append('image', file);
 
       try {
-        const response = await fetch('http://localhost:3000/api/upload-image', {
+        const response = await fetch('/api/upload-image', {
           method: 'POST',
           body: formData
         });
@@ -343,7 +343,7 @@ $('#generate-btn').on('click', async function() {
         $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 更新中...');
 
         try {
-            const response = await fetch('http://localhost:3000/api/generate', { method: 'POST' });
+            const response = await fetch('/api/generate', { method: 'POST' });
             const result = await response.json();
 
             if (response.ok) {
@@ -367,7 +367,7 @@ $('#cleanup-btn').on('click', async function() {
       $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> 処理中...');
 
       try {
-        const response = await fetch('http://localhost:3000/api/images/cleanup', { method: 'DELETE' });
+        const response = await fetch('/api/images/cleanup', { method: 'DELETE' });
         const result = await response.json();
         alert(result.message);
       } catch (error) {
