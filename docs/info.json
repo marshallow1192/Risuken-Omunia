@@ -1,15 +1,5 @@
 [
   {
-    "id": "test",
-    "title": "ests",
-    "date": "2026-02-12",
-    "category": "info",
-    "displayDate": "2026年2月12日",
-    "contentMd": "",
-    "link": "articles/test.html",
-    "img": "../img/articleimg/1770734964745-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-10222439.png"
-  },
-  {
     "category": "info",
     "title": "本日 中原トポロジーゼミが開催されました！！",
     "date": "2026-01-30",
@@ -17,7 +7,8 @@
     "displayDate": "2026年1月30日",
     "id": 13,
     "link": "articles/article13.html",
-    "img": "../img/articleimg/1770040006543-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-02224321.png"
+    "img": "../img/articleimg/1770040006543-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-02224321.png",
+    "customId": "13"
   },
   {
     "category": "info",
