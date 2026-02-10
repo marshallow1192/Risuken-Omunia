@@ -319,20 +319,35 @@ $(function() {
     });
 
     // 削除ボタンのクリックイベント
+    // 削除ボタンのクリックイベント
     $(document).on('click', '.delete-btn', async function() {
-        if(!confirm('本当に削除しますか？')) return;
+        // ▼▼▼ 変更：確認だけでなく、パスワード入力を求める ▼▼▼
+        const password = prompt('削除するにはパスワードを入力してください:');
+        // キャンセルボタンが押されたら何もしない
+        if (password === null) return;
 
         const id = $(this).data('id');
-        const category = $(this).data('cat'); // ボタンに埋め込んだカテゴリを取得
+        const category = $(this).data('cat');
 
         try {
-            // 削除リクエストにも ?cat=... をつける
-            await fetch(`${API_URL}/${id}?cat=${category}`, { method: 'DELETE' });
-            alert('削除しました');
-            loadPosts(); // リストを更新
+            const response = await fetch(`${API_URL}/${id}?cat=${category}`, {
+                method: 'DELETE',
+                // ▼▼▼ 追加：JSON形式でパスワードを送る設定 ▼▼▼
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message); // 「削除しました」
+                loadPosts(); // リストを更新
+            } else {
+                alert('エラー: ' + result.message); // 「パスワードが違います」など
+            }
         } catch (error) {
             console.error(error);
-            alert('削除に失敗しました');
+            alert('通信エラーが発生しました');
         }
     });
 
