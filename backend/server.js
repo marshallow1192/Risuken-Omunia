@@ -149,7 +149,7 @@ app.get('/api/posts/:id', (req, res) => {
       const post = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       res.status(200).json(post);
     } else {
-      res.status(404).json({ message: '記事が見つかりません。' });
+      res.status(404).json({ message: '記事が見つかりません' });
     }
   } catch (error) {
     res.status(500).json({ message: 'サーバーエラー' });
@@ -167,24 +167,24 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 
-  let idNum;
+  let id;
   // カスタムID（URLに使われる名前）の決定
   if (req.body.customId && req.body.customId.trim() !== '') {
-    idNum = req.body.customId.trim();
-    // ファイル重複チェック (idNum.json があるかどうか)
-    if (fs.existsSync(path.join(dirPath, `${idNum}.json`))) {
-      console.log(`⚠️ ID "${idNum}" は使用済みのため、時間を付与します。`);
-      idNum = `${idNum}-${Date.now()}`;
+    id = req.body.customId.trim();
+    // ファイル重複チェック (id.json があるかどうか)
+    if (fs.existsSync(path.join(dirPath, `${id}.json`))) {
+      console.log(`⚠️ ID "${id}" は使用済みのため、時間を付与します。`);
+      id = `${id}-${Date.now()}`;
     }
   } else {
     // 空欄ならタイムスタンプ
-    idNum = Date.now().toString();
+    id = Date.now().toString();
   }
 
   const filenamePrefix = category === 'tech' ? 'tech' : 'article';
   // リンクはシンプルに "articles/ID.html" 形式にする（お好みで調整可）
   // 連番風にしたければここを調整ですが、ファイル名管理ならIDそのままが綺麗です
-  const linkName = `articles/${idNum}.html`; 
+  const linkName = `articles/${id}.html`; 
 
   // 本文の画像パス修正
   if (req.body.contentMd) {
@@ -192,7 +192,7 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
   }
 
   const newPost = {
-    idNum: idNum,
+    id: id,
     title: req.body.title,
     date: req.body.date,
     category: category,
@@ -212,9 +212,9 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
 
   try {
     // ★重要：個別のJSONファイルとして保存
-    fs.writeFileSync(path.join(dirPath, `${idNum}.json`), JSON.stringify(newPost, null, 2), 'utf8');
+    fs.writeFileSync(path.join(dirPath, `${id}.json`), JSON.stringify(newPost, null, 2), 'utf8');
     
-    res.status(200).json({ message: `【${category}】記事(ID:${idNum})を保存しました！\n「サイトを更新して公開」を押すと反映されます。` });
+    res.status(200).json({ message: `【${category}】記事(ID:${id})を保存しました！\n「サイトを更新して公開」を押すと反映されます。` });
   } catch (error) {
     console.error('保存エラー:', error);
     res.status(500).json({ message: '保存に失敗しました。' });
