@@ -1,0 +1,22 @@
+{
+  "name": "Omunia Site Editor",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+
+  // 3000番ポートを最初から「公開」状態にする
+  "forwardPorts": [3000],
+
+  // 起動したときに自動でやるコマンド
+  "postCreateCommand": "cd backend && npm install && cd ..",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // 保存したら自動整形とかの設定も入れられる
+      },
+      "extensions": [
+        // 入れておきたい拡張機能があれば書く
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}
