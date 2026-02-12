@@ -1,5 +1,27 @@
 [
   {
+    "id": "yukie2",
+    "title": "雪江代数ゼミが開催されました！！",
+    "date": "2026-02-10",
+    "category": "info",
+    "displayDate": "2026年2月10日",
+    "contentMd": "## 2月10日に雪江代数ゼミが森之宮キャンパスにて開催されました！！\r\n\r\n### 今回は朝から集まってかなり長時間行いました！\r\n\r\n2.2 環と体の定義まで実施しました！！\r\n",
+    "link": "articles/yukie2.html",
+    "img": "../img/articleimg/1770908617095-IMG_8882.jpg",
+    "customId": "yukie2"
+  },
+  {
+    "id": "nakatopo12",
+    "title": "中原トポロジーゼミが開催されました！！",
+    "date": "2026-02-06",
+    "category": "info",
+    "displayDate": "2026年2月6日",
+    "contentMd": "# 本日中原トポロジーゼミが開催されました！！\r\n\r\n## 今回は4.4.2の最後まで実施しました！\r\n\r\n\r\n![画像の説明](img/articleimg/1770908896098-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-13000505.png)\r\n\r\n\r\n\r\n次回でいったんこのゼミは終了？となり，次々回からは5章の多様体と6章以降の内容を扱う人に分かれて行われます！！",
+    "link": "articles/nakatopo12.html",
+    "img": "../img/articleimg/1770908847156-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-13000459.png",
+    "customId": "nakatopo12"
+  },
+  {
     "category": "info",
     "title": "本日 中原トポロジーゼミが開催されました！！",
     "date": "2026-01-30",
