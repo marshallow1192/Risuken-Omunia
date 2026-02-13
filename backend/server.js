@@ -184,11 +184,12 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
   const filenamePrefix = category === 'tech' ? 'tech' : 'article';
   // リンクはシンプルに "articles/ID.html" 形式にする（お好みで調整可）
   // 連番風にしたければここを調整ですが、ファイル名管理ならIDそのままが綺麗です
-  const linkName = `articles/${id}.html`; 
+  const linkName = `articles/${id}.html`;
 
   // 本文の画像パス修正
   if (req.body.contentMd) {
-    req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+    req.body.contentMd = req.body.contentMd.replace(/img\/articleimg\//g, '../img/articleimg/');
+    req.body.contentMd = req.body.contentMd.replace(/docs\//g, '');
   }
 
   const newPost = {
@@ -213,7 +214,7 @@ app.post('/api/posts', upload.single('image'), async(req, res) => {
   try {
     // ★重要：個別のJSONファイルとして保存
     fs.writeFileSync(path.join(dirPath, `${id}.json`), JSON.stringify(newPost, null, 2), 'utf8');
-    
+
     res.status(200).json({ message: `【${category}】記事(ID:${id})を保存しました！\n「サイトを更新して公開」を押すと反映されます。` });
   } catch (error) {
     console.error('保存エラー:', error);
@@ -233,7 +234,8 @@ app.put('/api/posts/:id', upload.single('image'), async(req, res) => {
     const currentPost = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
     if (req.body.contentMd) {
-      req.body.contentMd = req.body.contentMd.replace(/docs\/img\//g, '../img/');
+      req.body.contentMd = req.body.contentMd.replace(/img\/articleimg\//g, '../img/articleimg/');
+      req.body.contentMd = req.body.contentMd.replace(/docs\//g, '');
     }
     if (req.file) {
       await optimizeImage(req.file.path);
@@ -294,7 +296,7 @@ app.delete('/api/posts/:id', (req, res) => {
 // お掃除・生成用API
 app.delete('/api/images/cleanup', (req, res) => {
   const imgDir = path.join(__dirname, '../docs/img/articleimg');
-  
+
   try {
     if (!fs.existsSync(imgDir)) return res.json({ message: 'フォルダがありません' });
 
@@ -330,11 +332,23 @@ app.delete('/api/images/cleanup', (req, res) => {
 
 function collectUsedImages(posts, set) {
   posts.forEach(post => {
-    if (post.img) set.add(path.basename(post.img));
+    // 1. サムネイル画像は無条件で守る
+    if (post.img) {
+        set.add(path.basename(post.img));
+    }
+
+    // 2. 本文中の画像を守る（最強版）
     if (post.contentMd) {
-      const matches = post.contentMd.match(/img\/[a-zA-Z0-9_\-\.\/]+/g);
+      // ▼▼▼ ここが変更点！ ▼▼▼
+      // 「スペース、改行、カッコ()、引用符"'」 以外の文字が連続していて、
+      // 最後に画像拡張子がついているものを全部拾う！
+      const matches = post.contentMd.match(/[^ \t\n\r"'\(\)]+\.(jpg|jpeg|png|gif|webp)/gi);
+
       if (matches) {
-        matches.forEach(match => set.add(path.basename(match)));
+        matches.forEach(filename => {
+            // ファイル名部分だけを取り出して「使用中リスト」に入れる
+            set.add(path.basename(filename));
+        });
       }
     }
   });
