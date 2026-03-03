@@ -1,13 +1,57 @@
 [
   {
+    "id": "jjsakurai1",
+    "title": "本日 JJサクライゼミが開催されました！！",
+    "date": "2026-02-16",
+    "category": "info",
+    "displayDate": "2026年2月16日",
+    "contentMd": "# 本日杉本キャンパスにて JJサクライ量子力学ゼミの初回が開催されました！！\r\n\r\n## 今日は1.1のシュテルンゲルラッハ実験から1.6の無限小並進演算子のところまでを扱いました！！\r\n\r\n\r\n![画像の説明](../img/articleimg/1771255937858-IMG_1995.jpg)\r\n\r\n\r\n次回は2/19でオンラインにて行います！",
+    "link": "articles/jjsakurai1.html",
+    "img": "../img/articleimg/1771255951559-IMG_1995.jpg"
+  },
+  {
+    "id": "jjsakurai0",
+    "title": "JJサクライゼミが開催されます！！",
+    "date": "2026-02-15",
+    "category": "info",
+    "displayDate": "2026年2月15日",
+    "contentMd": "## 春休みを使ってサクライ量子をなるべく読み進めたいと思っています\r\n\r\n### 初回は1章を全部読んでいきます!!!\r\n\r\nなるべく二月中に三章に入りたいと思います！！\r\n\r\n",
+    "link": "articles/jjsakurai0.html",
+    "img": "../img/articleimg/1771154978412-JJãµã¯ã©ã¤.png",
+    "customId": "jjsakurai0"
+  },
+  {
+    "id": "yukie2",
+    "title": "雪江代数ゼミが開催されました！！",
+    "date": "2026-02-10",
+    "category": "info",
+    "displayDate": "2026年2月10日",
+    "contentMd": "## 2月10日に雪江代数ゼミが森之宮キャンパスにて開催されました！！\r\n\r\n### 今回は朝から集まってかなり長時間行いました！\r\n\r\n2.2 環と体の定義まで実施しました！！\r\n",
+    "link": "articles/yukie2.html",
+    "img": "../img/articleimg/1770908617095-IMG_8882.jpg",
+    "customId": "yukie2"
+  },
+  {
+    "id": "nakatopo12",
+    "title": "中原トポロジーゼミが開催されました！！",
+    "date": "2026-02-06",
+    "category": "info",
+    "displayDate": "2026年2月6日",
+    "contentMd": "# 本日中原トポロジーゼミが開催されました！！\r\n\r\n## 今回は4.4.2の最後まで実施しました！\r\n\r\n\r\n![画像の説明](img/articleimg/1770908896098-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-13000505.png)\r\n\r\n\r\n\r\n次回でいったんこのゼミは終了？となり，次々回からは5章の多様体と6章以降の内容を扱う人に分かれて行われます！！",
+    "link": "articles/nakatopo12.html",
+    "img": "../img/articleimg/1770908847156-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-13000459.png",
+    "customId": "nakatopo12"
+  },
+  {
     "category": "info",
     "title": "本日 中原トポロジーゼミが開催されました！！",
     "date": "2026-01-30",
     "contentMd": "## テストのため一週間お休みしていたなかとぽゼミが開催されました！\r\n\r\n## 今回は4.4.2 多面体の基本群の計算 を扱いました！！\r\n\r\nちなみにあんまり進まなかったです🙇‍♂️🙇‍♂️🙇‍♂️\r\n\r\nこのゼミは４章を読み終わったら，５章の多様体，６章以降の部分を読みたい人に分かれて行われる予定です！！\r\n\r\n",
     "displayDate": "2026年1月30日",
-    "idNum": 13,
+    "id": 13,
     "link": "articles/article13.html",
-    "img": "../img/articleimg/1770040006543-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-02224321.png"
+    "img": "../img/articleimg/1770040006543-ã¹ã¯ãªã¼ã³ã·ã§ãã2026-02-02224321.png",
+    "customId": "13"
   },
   {
     "category": "info",
@@ -16,7 +60,7 @@
     "contentMd": "### 本日 オンラインにて中原トポロジーゼミの9回目が開催されました！！\r\n\r\n### 4.3～4.4.1まで扱いました！！\r\n\r\n## 次週から試験週間に入るので次のゼミは試験明けになります🐈\r\n\r\n\r\n![画像の説明](../img/articleimg/1770082470917-1768884148272-2026-01-20132024.png)\r\n",
     "displayDate": "2026年1月16日",
     "img": "../img/articleimg/1768884159525-test(2).png",
-    "idNum": 12,
+    "id": 12,
     "link": "articles/article12.html"
   },
   {
@@ -26,7 +70,7 @@
     "contentMd": "### 代数ゼミ 1回目 火曜2限\r\n\r\n### 1.1 集合と論理の復習 の途中まで実施しました。\r\n\r\n参考書として 著 雪江 明彦先生の[代数学1　群論入門](https://www.nippyo.co.jp/shop/book/5462.html) を用いています！！",
     "displayDate": "2026年1月6日",
     "img": "../img/articleimg/1767671135119-IMG_8521.jpg",
-    "idNum": 11,
+    "id": 11,
     "link": "articles/article11.html"
   },
   {
@@ -36,7 +80,7 @@
     "contentMd": "## 中トポゼミ 7回目\r\n4.2 基本群の一般的性質\r\nを実施しました．\r\n\r\n![画像の説明](../img/articleimg/1766323467347-IMG_1601.png)\r\n\r\n### 年末年始に入るので次はもしかしたら年始までないかもです...😵‍💫\r\n\r\n\r\n",
     "displayDate": "2025年12月19日",
     "img": "../img/articleimg/1766323547944-IMG_0464.png",
-    "idNum": 10,
+    "id": 10,
     "link": "articles/article10.html"
   },
   {
@@ -46,7 +90,7 @@
     "contentMd": "## 今日のゼミでは第三講一章と二章の一部を扱いました！！\r\n\r\n\r\n![画像の説明](../img/articleimg/1766103556979-IMG_4306.jpg)\r\n",
     "displayDate": "2025年12月18日",
     "img": "../img/articleimg/1766103565726-IMG_4307.jpg",
-    "idNum": 9,
+    "id": 9,
     "link": "articles/article9.html"
   },
   {
@@ -56,7 +100,7 @@
     "contentMd": "本日は，量子力学10講の第三講一章から二章までを扱いました！！",
     "displayDate": "2025年12月11日",
     "img": "../img/articleimg/1765497692971-IMG_4297.jpg",
-    "idNum": 8,
+    "id": 8,
     "link": "articles/article8.html"
   },
   {
@@ -65,7 +109,7 @@
     "contentMd": "## 代数学1群論入門(雪江明彦)を使ってゼミを行います。\r\nゆくゆくは2、3もやっていきたいと思ってます(実際にやるかは未定)\r\nオンラインじゃない場合、森ノ宮Cでやろうと思ってます。\r\n",
     "displayDate": "2025年12月9日",
     "img": "../img/articleimg/1765263059185-09165.jpg",
-    "idNum": 7,
+    "id": 7,
     "category": "info",
     "link": "articles/article7.html"
   },
@@ -75,7 +119,7 @@
     "contentMd": "## 本日 森之宮キャンパスにて量子力学ゼミが開催されました！！\r\n教科書は 著 谷村省吾先生 の [量子力学10講](https://www.unp.or.jp/ISBN/ISBN978-4-8158-1049-8.html)を使用しています！！\r\n\r\n今日は教科書 第二講七章から第三講の手前まで扱いました！！\r\n\r\n![画像の説明](../img/articleimg/1764894648397-IMG_4286.jpg)\r\n\r\n### このゼミは森之宮キャンパスにて毎週木曜日三限に行われていますのでご興味ありましたらぜひ途中からでも大丈夫なのでぜひご参加ください！！！",
     "displayDate": "2025年12月4日",
     "img": "../img/articleimg/1764899003120-IMG_4285.jpg",
-    "idNum": 6,
+    "id": 6,
     "category": "info",
     "link": "articles/article6.html"
   },
@@ -85,7 +129,7 @@
     "contentMd": "## 本日より中原トポロジーゼミが開催されます！！\r\n使用教科書は 著 中原 幹夫先生 約 佐久間 一浩先生の 「理論物理学のための幾何学とトポロジーI」です！！\r\n### 今回のゼミには外部の方も参加されています！！",
     "displayDate": "2025年11月5日",
     "img": "../img/articleimg/1764295846016-G49IupmbQAUHrWh.jpeg",
-    "idNum": 4,
+    "id": 4,
     "category": "info",
     "link": "articles/article4.html"
   },
@@ -95,7 +139,7 @@
     "contentMd": "## 本日プログラミングゼミが開催されました！！\r\nこのゼミでは， 東京大学 数理・情報教育研究センター様により公開されているpythonプログラミング入門というサイトを用いています！！\r\n\r\n今日は3-2のループについて扱いました！！\r\n\r\n",
     "displayDate": "2025年10月7日",
     "img": "../img/articleimg/1759799389330-test.png",
-    "idNum": 3,
+    "id": 3,
     "category": "info",
     "link": "articles/article3.html"
   },
@@ -105,12 +149,12 @@
     "contentMd": "# 森ノ宮キャンパス一足先に行ってみました！\r\n思っていたより広くて、教室も充実しているので快適に活動できそうです！！",
     "displayDate": "2025年9月27日",
     "img": "../img/articleimg/1764296082998-G1lczdgaoAEJjK5.jpeg",
-    "idNum": 5,
+    "id": 5,
     "category": "info",
     "link": "articles/article5.html"
   },
   {
-    "idNum": 2,
+    "id": 2,
     "link": "articles/article2.html",
     "date": "2025-04-12",
     "img": "../img/articleimg/slide2.jpg",
@@ -120,7 +164,7 @@
     "contentMd": "<p>本日，森ノ宮キャンパスにて線形代数ゼミが行われました！<br>教科書は斎藤先生の線型代数入門を使用しています！</p>"
   },
   {
-    "idNum": 1,
+    "id": 1,
     "link": "articles/article1.html",
     "date": "2025-04-11",
     "img": "../img/articleimg/slide1.webp",
