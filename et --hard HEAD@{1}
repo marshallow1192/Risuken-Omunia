@@ -1,0 +1,29 @@
+[33m9b6fefd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32marticle/test[m[33m, [m[1;31morigin/article/test[m[33m)[m HEAD@{0}: commit (merge): 新歓用ページ作成
+[33m60c8f9e[m HEAD@{1}: checkout: moving from test/edit to article/test
+[33m4687228[m[33m ([m[1;32mtest/edit[m[33m)[m HEAD@{2}: commit: 新歓用ページ作成
+[33m5e07a2d[m HEAD@{3}: pull origin risuken: Fast-forward
+[33m4feb171[m[33m ([m[1;31morigin/test/edit[m[33m)[m HEAD@{4}: commit: 記事削除
+[33madbc98a[m HEAD@{5}: commit: コードオーナー設定
+[33mca66db6[m HEAD@{6}: commit: 記事更新
+[33mc51813c[m HEAD@{7}: checkout: moving from test/edit to test/edit
+[33mc51813c[m HEAD@{8}: pull origin risuken: Fast-forward
+[33m17fe9bc[m HEAD@{9}: commit: 自主ゼミリスト更新
+[33m1e76345[m HEAD@{10}: commit: 記事投稿
+[33m70abc69[m HEAD@{11}: commit: 記事編集
+[33m15798fa[m HEAD@{12}: commit: 記事編集
+[33m62c8503[m HEAD@{13}: checkout: moving from test/edit to test/edit
+[33m62c8503[m HEAD@{14}: commit: パスワード
+[33m2208336[m HEAD@{15}: checkout: moving from test/edit to test/edit
+[33m2208336[m HEAD@{16}: pull origin risuken: Fast-forward
+[33m4460749[m HEAD@{17}: commit: 編集
+[33mb00c1cf[m[33m ([m[1;32mrisuken[m[33m)[m HEAD@{18}: checkout: moving from risuken to test/edit
+[33mb00c1cf[m[33m ([m[1;32mrisuken[m[33m)[m HEAD@{19}: checkout: moving from risuken to risuken
+[33mb00c1cf[m[33m ([m[1;32mrisuken[m[33m)[m HEAD@{20}: checkout: moving from article/test to risuken
+[33m60c8f9e[m HEAD@{21}: commit: test
+[33mb00c1cf[m[33m ([m[1;32mrisuken[m[33m)[m HEAD@{22}: checkout: moving from risuken to article/test
+[33mb00c1cf[m[33m ([m[1;32mrisuken[m[33m)[m HEAD@{23}: pull: Merge made by the 'ort' strategy.
+[33m516f467[m HEAD@{24}: commit: test
+[33me3cd938[m HEAD@{25}: commit: test
+[33m85708eb[m HEAD@{26}: commit: test
+[33md5e339c[m HEAD@{27}: commit: test
+[33mc007a6d[m HEAD@{28}: clone: from https://github.com/marshallow1192/Risuken-Omunia.git
