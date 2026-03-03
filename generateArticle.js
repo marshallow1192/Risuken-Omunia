@@ -1,6 +1,6 @@
 const fs = require('fs');
 const ejs = require('ejs');
-const marked = require('marked');
+const {marked} = require('marked');
 const path = require('path');
 
 console.log('記事ページの生成を開始します...');
